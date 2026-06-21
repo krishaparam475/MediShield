@@ -1,0 +1,2312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MediShield - Emergency Health Card System</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+:root {
+  --primary: #E63946;
+  --primary-dark: #C1121F;
+  --primary-glow: rgba(230,57,70,0.3);
+  --secondary: #1D3557;
+  --accent: #F4A261;
+  --accent-2: #2A9D8F;
+  --bg-dark: #060B18;
+  --bg-card: #0D1526;
+  --bg-card-2: #111D33;
+  --bg-card-hover: #152240;
+  --text: #F1F5F9;
+  --text-muted: #7B8CA8;
+  --border: #1A2744;
+  --success: #10B981;
+  --warning: #F59E0B;
+  --danger: #EF4444;
+  --info: #3B82F6;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'DM Sans',sans-serif; background:var(--bg-dark); color:var(--text); overflow-x:hidden; }
+h1,h2,h3,h4,h5,h6 { font-family:'Outfit',sans-serif; }
+::-webkit-scrollbar { width:6px; }
+::-webkit-scrollbar-track { background:var(--bg-dark); }
+::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
+::-webkit-scrollbar-thumb:hover { background:var(--text-muted); }
+
+.hidden { display:none !important; }
+
+/* Login Background */
+.login-bg {
+  min-height:100vh;
+  background: radial-gradient(ellipse at 20% 50%, rgba(230,57,70,0.12) 0%, transparent 50%),
+              radial-gradient(ellipse at 80% 20%, rgba(42,157,143,0.08) 0%, transparent 50%),
+              radial-gradient(ellipse at 50% 80%, rgba(244,162,97,0.06) 0%, transparent 50%),
+              var(--bg-dark);
+  position:relative;
+  overflow:hidden;
+}
+.login-bg::before {
+  content:'';position:absolute;top:0;left:0;right:0;bottom:0;
+  background-image: radial-gradient(rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events:none;
+}
+
+/* Floating orbs */
+.orb {
+  position:absolute;border-radius:50%;filter:blur(80px);opacity:0.4;
+  animation: orbFloat 8s ease-in-out infinite;
+}
+.orb-1 { width:300px;height:300px;background:var(--primary);top:-100px;left:-50px;animation-delay:0s; }
+.orb-2 { width:200px;height:200px;background:var(--accent-2);bottom:-80px;right:-40px;animation-delay:3s; }
+.orb-3 { width:150px;height:150px;background:var(--accent);top:50%;right:20%;animation-delay:5s; }
+
+@keyframes orbFloat {
+  0%,100% { transform:translate(0,0) scale(1); }
+  33% { transform:translate(30px,-20px) scale(1.05); }
+  66% { transform:translate(-20px,15px) scale(0.95); }
+}
+
+/* Glass Card */
+.glass-card {
+  background: rgba(13,21,38,0.8);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(26,39,68,0.6);
+  border-radius: 16px;
+}
+.glass-card-2 {
+  background: rgba(17,29,51,0.7);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(26,39,68,0.5);
+  border-radius: 12px;
+}
+
+/* Pulse ring */
+.pulse-ring {
+  position:relative;
+}
+.pulse-ring::before, .pulse-ring::after {
+  content:'';position:absolute;inset:-4px;border-radius:50%;
+  border:2px solid var(--primary);
+  animation: pulseRing 2s ease-out infinite;
+}
+.pulse-ring::after { animation-delay:1s; }
+@keyframes pulseRing {
+  0% { transform:scale(1);opacity:0.6; }
+  100% { transform:scale(1.5);opacity:0; }
+}
+
+/* Buttons */
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color:#fff;padding:12px 24px;border-radius:10px;border:none;cursor:pointer;
+  font-weight:600;font-family:'DM Sans',sans-serif;font-size:14px;
+  transition: all 0.3s ease; position:relative;overflow:hidden;
+}
+.btn-primary:hover {
+  transform:translateY(-2px);
+  box-shadow: 0 8px 25px var(--primary-glow);
+}
+.btn-primary:active { transform:translateY(0); }
+
+.btn-secondary {
+  background: rgba(26,39,68,0.6);
+  color:var(--text);padding:12px 24px;border-radius:10px;
+  border:1px solid var(--border);cursor:pointer;
+  font-weight:500;font-family:'DM Sans',sans-serif;font-size:14px;
+  transition: all 0.3s ease;
+}
+.btn-secondary:hover {
+  background: rgba(26,39,68,0.9);
+  border-color: var(--text-muted);
+}
+
+.btn-accent {
+  background: linear-gradient(135deg, var(--accent-2), #1a7a6e);
+  color:#fff;padding:12px 24px;border-radius:10px;border:none;cursor:pointer;
+  font-weight:600;font-family:'DM Sans',sans-serif;font-size:14px;
+  transition: all 0.3s ease;
+}
+.btn-accent:hover {
+  transform:translateY(-2px);
+  box-shadow: 0 8px 25px rgba(42,157,143,0.3);
+}
+
+.btn-warning {
+  background: linear-gradient(135deg, var(--accent), #d4883e);
+  color:#fff;padding:12px 24px;border-radius:10px;border:none;cursor:pointer;
+  font-weight:600;font-family:'DM Sans',sans-serif;font-size:14px;
+  transition: all 0.3s ease;
+}
+
+.btn-danger {
+  background: linear-gradient(135deg, #EF4444, #B91C1C);
+  color:#fff;padding:12px 24px;border-radius:10px;border:none;cursor:pointer;
+  font-weight:600;font-family:'DM Sans',sans-serif;font-size:14px;
+  transition: all 0.3s ease;
+}
+
+/* Input Fields */
+.input-field {
+  background: rgba(6,11,24,0.6);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 16px;
+  color: var(--text);
+  font-family:'DM Sans',sans-serif;
+  font-size: 14px;
+  width: 100%;
+  transition: all 0.3s ease;
+  outline: none;
+}
+.input-field:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-glow);
+}
+.input-field::placeholder { color: var(--text-muted); }
+
+select.input-field { cursor:pointer; appearance:none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%237B8CA8' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 12px center;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 260px;
+  min-height: 100vh;
+  background: var(--bg-card);
+  border-right: 1px solid var(--border);
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 40;
+  transition: transform 0.3s ease;
+  overflow-y: auto;
+}
+.sidebar.collapsed { transform: translateX(-260px); }
+
+.sidebar-link {
+  display:flex;align-items:center;gap:12px;
+  padding:12px 20px;color:var(--text-muted);
+  cursor:pointer;transition:all 0.2s ease;
+  border-radius:8px;margin:2px 12px;
+  font-size:14px;font-weight:500;
+}
+.sidebar-link:hover { color:var(--text);background:rgba(255,255,255,0.04); }
+.sidebar-link.active {
+  color:var(--primary);
+  background:rgba(230,57,70,0.1);
+  font-weight:600;
+}
+.sidebar-link.active i { color:var(--primary); }
+.sidebar-link i { width:20px;text-align:center;font-size:16px; }
+
+/* Main Content */
+.main-content {
+  margin-left: 260px;
+  min-height: 100vh;
+  transition: margin-left 0.3s ease;
+}
+.main-content.expanded { margin-left:0; }
+
+/* Top Bar */
+.top-bar {
+  height: 64px;
+  background: rgba(13,21,38,0.9);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 30;
+}
+
+/* Stat Cards */
+.stat-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+.stat-card::before {
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  border-radius:14px 14px 0 0;
+}
+.stat-card:hover { transform:translateY(-2px);border-color:rgba(255,255,255,0.1); }
+.stat-card.red::before { background:linear-gradient(90deg,var(--primary),var(--accent)); }
+.stat-card.teal::before { background:linear-gradient(90deg,var(--accent-2),#34d4b8); }
+.stat-card.orange::before { background:linear-gradient(90deg,var(--accent),#f7c59f); }
+.stat-card.blue::before { background:linear-gradient(90deg,#3B82F6,#60a5fa); }
+
+/* Toggle Switch */
+.toggle-switch {
+  width:48px;height:26px;border-radius:13px;
+  background:var(--border);cursor:pointer;
+  position:relative;transition:all 0.3s ease;
+}
+.toggle-switch.active { background:var(--success); }
+.toggle-switch::after {
+  content:'';position:absolute;width:22px;height:22px;
+  border-radius:50%;background:#fff;top:2px;left:2px;
+  transition:all 0.3s ease;box-shadow:0 2px 4px rgba(0,0,0,0.3);
+}
+.toggle-switch.active::after { left:24px; }
+
+/* Toast */
+.toast-container {
+  position:fixed;top:20px;right:20px;z-index:9999;
+  display:flex;flex-direction:column;gap:8px;
+}
+.toast {
+  padding:14px 20px;border-radius:10px;
+  backdrop-filter:blur(10px);
+  animation: toastIn 0.4s ease;
+  display:flex;align-items:center;gap:10px;
+  min-width:300px;max-width:420px;
+  font-size:14px;font-weight:500;
+  box-shadow:0 8px 30px rgba(0,0,0,0.3);
+}
+.toast.success { background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.3);color:#6ee7b7; }
+.toast.error { background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#fca5a5; }
+.toast.warning { background:rgba(245,158,11,0.15);border:1px solid rgba(245,158,11,0.3);color:#fcd34d; }
+.toast.info { background:rgba(59,130,246,0.15);border:1px solid rgba(59,130,246,0.3);color:#93c5fd; }
+
+@keyframes toastIn {
+  0% { transform:translateX(100%);opacity:0; }
+  100% { transform:translateX(0);opacity:1; }
+}
+
+/* Modal */
+.modal-overlay {
+  position:fixed;inset:0;background:rgba(0,0,0,0.7);
+  backdrop-filter:blur(4px);z-index:50;
+  display:flex;align-items:center;justify-content:center;
+  animation: fadeIn 0.3s ease;
+}
+.modal-content {
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:16px;max-width:600px;width:90%;
+  max-height:85vh;overflow-y:auto;
+  animation: modalSlide 0.3s ease;
+}
+@keyframes fadeIn { 0%{opacity:0} 100%{opacity:1} }
+@keyframes modalSlide { 0%{transform:translateY(20px);opacity:0} 100%{transform:translateY(0);opacity:1} }
+
+/* QR Code container */
+.qr-container { background:#fff;padding:16px;border-radius:12px;display:inline-block; }
+
+/* Badge */
+.badge {
+  display:inline-flex;align-items:center;gap:4px;
+  padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600;
+  text-transform:uppercase;letter-spacing:0.5px;
+}
+.badge-red { background:rgba(230,57,70,0.15);color:#f87171; }
+.badge-green { background:rgba(16,185,129,0.15);color:#6ee7b7; }
+.badge-orange { background:rgba(245,158,11,0.15);color:#fcd34d; }
+.badge-blue { background:rgba(59,130,246,0.15);color:#93c5fd; }
+.badge-teal { background:rgba(42,157,143,0.15);color:#5eead4; }
+
+/* Table */
+.data-table { width:100%;border-collapse:separate;border-spacing:0; }
+.data-table th {
+  text-align:left;padding:12px 16px;font-size:12px;
+  color:var(--text-muted);font-weight:600;text-transform:uppercase;
+  letter-spacing:0.5px;border-bottom:1px solid var(--border);
+}
+.data-table td {
+  padding:12px 16px;font-size:13px;
+  border-bottom:1px solid rgba(26,39,68,0.4);
+}
+.data-table tr:hover td { background:rgba(255,255,255,0.02); }
+
+/* Emergency Pulse */
+.emergency-pulse {
+  animation: emergencyPulse 1.5s ease-in-out infinite;
+}
+@keyframes emergencyPulse {
+  0%,100% { box-shadow:0 0 0 0 rgba(230,57,70,0.4); }
+  50% { box-shadow:0 0 0 12px rgba(230,57,70,0); }
+}
+
+/* Offline indicator */
+.offline-banner {
+  background: linear-gradient(90deg, var(--warning), #d97706);
+  color:#000;padding:8px 16px;text-align:center;
+  font-weight:600;font-size:13px;
+}
+
+/* Live dot */
+.live-dot {
+  width:8px;height:8px;border-radius:50%;background:var(--success);
+  display:inline-block;animation: liveBlink 1s ease infinite;
+}
+@keyframes liveBlink {
+  0%,100% { opacity:1; }
+  50% { opacity:0.3; }
+}
+
+/* Card hover effect */
+.hover-lift { transition:all 0.3s ease; }
+.hover-lift:hover { transform:translateY(-3px);box-shadow:0 12px 40px rgba(0,0,0,0.3); }
+
+/* Role card on login */
+.role-card {
+  cursor:pointer;
+  transition:all 0.3s ease;
+  border:2px solid transparent;
+}
+.role-card:hover, .role-card.selected {
+  border-color:var(--primary);
+  transform:translateY(-4px);
+  box-shadow:0 12px 40px var(--primary-glow);
+}
+
+/* Progress bar */
+.progress-bar {
+  height:6px;background:var(--border);border-radius:3px;overflow:hidden;
+}
+.progress-fill {
+  height:100%;border-radius:3px;transition:width 1s ease;
+}
+
+/* Encryption visual */
+.encrypt-shield {
+  width:80px;height:80px;border-radius:50%;
+  background:linear-gradient(135deg,var(--accent-2),#1a7a6e);
+  display:flex;align-items:center;justify-content:center;
+  font-size:32px;color:#fff;
+  box-shadow:0 0 30px rgba(42,157,143,0.3);
+}
+
+/* Map placeholder */
+.map-placeholder {
+  background: linear-gradient(135deg, #0a1628, #111d33);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  min-height: 250px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+.map-grid {
+  position:absolute;inset:0;
+  background-image: 
+    linear-gradient(rgba(42,157,143,0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(42,157,143,0.05) 1px, transparent 1px);
+  background-size: 30px 30px;
+}
+.map-pin {
+  width:16px;height:16px;border-radius:50%;background:var(--primary);
+  position:absolute;animation: pinPulse 2s ease infinite;
+}
+@keyframes pinPulse {
+  0%,100% { box-shadow:0 0 0 0 rgba(230,57,70,0.5); }
+  50% { box-shadow:0 0 0 10px rgba(230,57,70,0); }
+}
+
+/* Responsive */
+@media (max-width:768px) {
+  .sidebar { transform:translateX(-260px); }
+  .sidebar.mobile-open { transform:translateX(0); }
+  .main-content { margin-left:0 !important; }
+}
+
+/* Fade transition */
+.fade-in { animation: fadeIn 0.4s ease; }
+.slide-up { animation: modalSlide 0.4s ease; }
+
+/* Notification bell animation */
+.bell-shake { animation: bellShake 0.5s ease; }
+@keyframes bellShake {
+  0%{transform:rotate(0)} 25%{transform:rotate(15deg)} 50%{transform:rotate(-10deg)} 75%{transform:rotate(5deg)} 100%{transform:rotate(0)}
+}
+
+/* Emergency access button glow */
+.emergency-glow {
+  animation: emergGlow 2s ease-in-out infinite;
+}
+@keyframes emergGlow {
+  0%,100% { box-shadow:0 0 5px rgba(230,57,70,0.3); }
+  50% { box-shadow:0 0 25px rgba(230,57,70,0.6),0 0 50px rgba(230,57,70,0.2); }
+}
+</style>
+</head>
+<body>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- ============ LOGIN SCREEN ============ -->
+<div id="loginScreen" class="login-bg flex items-center justify-center p-4">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+  
+  <div class="glass-card p-8 w-full max-w-md relative z-10 fade-in">
+    <!-- Logo -->
+    <div class="text-center mb-8">
+      <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-red-500 to-red-700 mb-4 emergency-pulse">
+        <i class="fas fa-heartbeat text-2xl text-white"></i>
+      </div>
+      <h1 class="text-3xl font-bold" style="font-family:'Outfit'">MediShield</h1>
+      <p class="text-sm mt-1" style="color:var(--text-muted)">Emergency Health Card System</p>
+      <div class="flex items-center justify-center gap-2 mt-2">
+        <i class="fas fa-shield-halved text-xs" style="color:var(--accent-2)"></i>
+        <span class="text-xs" style="color:var(--accent-2)">AES-256 Encrypted</span>
+      </div>
+    </div>
+    
+    <!-- Role Selection -->
+    <div class="mb-6">
+      <label class="text-xs font-semibold uppercase tracking-wider mb-3 block" style="color:var(--text-muted)">Select Your Role</label>
+      <div class="grid grid-cols-2 gap-3">
+        <div class="role-card glass-card-2 p-3 text-center rounded-xl" data-role="user" onclick="selectRole('user')">
+          <i class="fas fa-user text-lg mb-1" style="color:var(--accent)"></i>
+          <div class="text-xs font-semibold">User</div>
+        </div>
+        <div class="role-card glass-card-2 p-3 text-center rounded-xl" data-role="hospital" onclick="selectRole('hospital')">
+          <i class="fas fa-hospital text-lg mb-1" style="color:var(--primary)"></i>
+          <div class="text-xs font-semibold">Hospital</div>
+        </div>
+        <div class="role-card glass-card-2 p-3 text-center rounded-xl" data-role="ambulance" onclick="selectRole('ambulance')">
+          <i class="fas fa-truck-medical text-lg mb-1" style="color:var(--accent-2)"></i>
+          <div class="text-xs font-semibold">Ambulance</div>
+        </div>
+        <div class="role-card glass-card-2 p-3 text-center rounded-xl" data-role="admin" onclick="selectRole('admin')">
+          <i class="fas fa-shield text-lg mb-1" style="color:var(--info)"></i>
+          <div class="text-xs font-semibold">Admin</div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Login Form -->
+    <div id="loginForm">
+      <div class="mb-4">
+        <label class="text-xs font-semibold mb-1 block" style="color:var(--text-muted)">Email / ID</label>
+        <input type="text" id="loginEmail" class="input-field" placeholder="Enter your email or ID" value="">
+      </div>
+      <div class="mb-4">
+        <label class="text-xs font-semibold mb-1 block" style="color:var(--text-muted)">Password</label>
+        <div class="relative">
+          <input type="password" id="loginPassword" class="input-field pr-10" placeholder="Enter your password" value="">
+          <button onclick="togglePassword()" class="absolute right-3 top-1/2 -translate-y-1/2" style="color:var(--text-muted);background:none;border:none;cursor:pointer">
+            <i class="fas fa-eye" id="eyeIcon"></i>
+          </button>
+        </div>
+      </div>
+      <div class="flex items-center justify-between mb-6">
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input type="checkbox" class="w-4 h-4 rounded accent-red-500">
+          <span class="text-xs" style="color:var(--text-muted)">Remember me</span>
+        </label>
+        <a href="#" class="text-xs font-semibold" style="color:var(--primary)">Forgot Password?</a>
+      </div>
+      <button class="btn-primary w-full text-center" onclick="handleLogin()">
+        <i class="fas fa-right-to-bracket mr-2"></i>Sign In
+      </button>
+    </div>
+    
+    <div class="text-center mt-6">
+      <p class="text-xs" style="color:var(--text-muted)">Don't have an account? <a href="#" onclick="showToast('Registration coming soon!','info')" class="font-semibold" style="color:var(--primary)">Register Here</a></p>
+    </div>
+    
+    <!-- Demo credentials -->
+    <div class="mt-6 p-3 rounded-lg" style="background:rgba(42,157,143,0.08);border:1px solid rgba(42,157,143,0.15)">
+      <p class="text-xs font-semibold mb-1" style="color:var(--accent-2)"><i class="fas fa-info-circle mr-1"></i>Demo Credentials</p>
+      <p class="text-xs" style="color:var(--text-muted)">Any email/password works. Select a role to explore.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============ USER DASHBOARD ============ -->
+<div id="userDashboard" class="hidden">
+  <!-- Offline Banner -->
+  <div id="offlineBanner" class="offline-banner hidden">
+    <i class="fas fa-wifi-slash mr-2"></i>Offline Mode Active - Data will sync when connected
+  </div>
+  
+  <!-- Sidebar -->
+  <nav class="sidebar" id="userSidebar">
+    <div class="p-5 border-b" style="border-color:var(--border)">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-red-500 to-red-700 flex items-center justify-center">
+          <i class="fas fa-heartbeat text-white"></i>
+        </div>
+        <div>
+          <h3 class="font-bold text-sm" style="font-family:'Outfit'">MediShield</h3>
+          <p class="text-xs" style="color:var(--text-muted)">User Portal</p>
+        </div>
+      </div>
+    </div>
+    <div class="py-4">
+      <div class="px-5 mb-2"><span class="text-xs font-semibold uppercase tracking-wider" style="color:var(--text-muted)">Main</span></div>
+      <div class="sidebar-link active" onclick="showUserSection('healthCard')"><i class="fas fa-id-card-clip"></i>Health Card</div>
+      <div class="sidebar-link" onclick="showUserSection('medicalInfo')"><i class="fas fa-file-medical"></i>Medical Info</div>
+      <div class="sidebar-link" onclick="showUserSection('emergencyContacts')"><i class="fas fa-phone-volume"></i>Emergency Contacts</div>
+      <div class="sidebar-link" onclick="showUserSection('scanLogs')"><i class="fas fa-clock-rotate-left"></i>Scan Logs</div>
+      <div class="px-5 mt-4 mb-2"><span class="text-xs font-semibold uppercase tracking-wider" style="color:var(--text-muted)">Features</span></div>
+      <div class="sidebar-link" onclick="showUserSection('bloodDonation')"><i class="fas fa-droplet"></i>Blood Donation</div>
+      <div class="sidebar-link" onclick="showUserSection('chronicDiseases')"><i class="fas fa-disease"></i>Chronic Diseases</div>
+      <div class="sidebar-link" onclick="showUserSection('geoTracking')"><i class="fas fa-location-dot"></i>Geo Tracking</div>
+      <div class="sidebar-link" onclick="showUserSection('userSettings')"><i class="fas fa-gear"></i>Settings</div>
+    </div>
+    <div class="absolute bottom-0 left-0 right-0 p-4 border-t" style="border-color:var(--border)">
+      <button class="btn-secondary w-full text-center text-sm" onclick="handleLogout()">
+        <i class="fas fa-right-from-bracket mr-2"></i>Logout
+      </button>
+    </div>
+  </nav>
+  
+  <!-- Main -->
+  <div class="main-content" id="userMain">
+    <!-- Top Bar -->
+    <div class="top-bar flex items-center justify-between px-6">
+      <div class="flex items-center gap-4">
+        <button class="md:hidden" onclick="toggleSidebar('userSidebar')" style="background:none;border:none;color:var(--text);cursor:pointer">
+          <i class="fas fa-bars text-lg"></i>
+        </button>
+        <h2 class="text-lg font-bold" style="font-family:'Outfit'" id="userPageTitle">Health Card</h2>
+      </div>
+      <div class="flex items-center gap-4">
+        <button onclick="showToast('No new notifications','info')" style="background:none;border:none;cursor:pointer;position:relative">
+          <i class="fas fa-bell" style="color:var(--text-muted);font-size:18px"></i>
+          <span class="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-red-500 text-white text-xs flex items-center justify-center">3</span>
+        </button>
+        <div class="flex items-center gap-2">
+    <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-sm font-bold text-black">R</div>
+          <span class="text-sm font-medium hidden sm:block">Rahul </span>
+        </div>
+      </div>
+    </div>
+    
+    <!-- User Sections -->
+    <div class="p-6">
+      <!-- Health Card Section -->
+      <div id="section-healthCard" class="fade-in">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <!-- QR Code Card -->
+          <div class="lg:col-span-1">
+            <div class="glass-card p-6 text-center">
+              <div class="flex items-center justify-between mb-4">
+                <span class="badge badge-red"><i class="fas fa-lock mr-1"></i>Encrypted</span>
+                <span class="badge badge-green"><i class="fas fa-check-circle mr-1"></i>Active</span>
+              </div>
+              <div class="qr-container inline-block mb-4" id="userQRCode"></div>
+              <h3 class="font-bold text-lg" style="font-family:'Outfit'">Rahul </h3>
+              <p class="text-xs mt-1" style="color:var(--text-muted)">EHC-2024-IN-87432</p>
+              <div class="flex items-center justify-center gap-2 mt-2">
+                <span class="badge badge-red">B+ Positive</span>
+              </div>
+              <div class="mt-4 p-3 rounded-lg" style="background:rgba(42,157,143,0.08);border:1px solid rgba(42,157,143,0.15)">
+                <p class="text-xs" style="color:var(--accent-2)"><i class="fas fa-shield-halved mr-1"></i>AES-256 Encrypted QR Data</p>
+                <p class="text-xs mt-1" style="color:var(--text-muted)">Only authorized responders can decrypt</p>
+              </div>
+              <div class="grid grid-cols-2 gap-3 mt-4">
+                <button class="btn-primary text-xs py-2" onclick="downloadQR()"><i class="fas fa-download mr-1"></i>Download</button>
+                <button class="btn-secondary text-xs py-2" onclick="printCard()"><i class="fas fa-print mr-1"></i>Print Card</button>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Quick Info -->
+          <div class="lg:col-span-2">
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+              <div class="stat-card red">
+                <i class="fas fa-droplet mb-2" style="color:var(--primary)"></i>
+                <div class="text-2xl font-bold" style="font-family:'Outfit'">B+</div>
+                <div class="text-xs" style="color:var(--text-muted)">Blood Group</div>
+              </div>
+              <div class="stat-card teal">
+                <i class="fas fa-truck-medical mb-2" style="color:var(--accent-2)"></i>
+                <div class="text-2xl font-bold" style="font-family:'Outfit'">108</div>
+                <div class="text-xs" style="color:var(--text-muted)">Ambulance</div>
+              </div>
+              <div class="stat-card orange">
+                <i class="fas fa-eye mb-2" style="color:var(--accent)"></i>
+                <div class="text-2xl font-bold" style="font-family:'Outfit'">7</div>
+                <div class="text-xs" style="color:var(--text-muted)">QR Scans</div>
+              </div>
+              <div class="stat-card blue">
+                <i class="fas fa-droplet mb-2" style="color:var(--info)"></i>
+                <div class="text-2xl font-bold" style="font-family:'Outfit'">ON</div>
+                <div class="text-xs" style="color:var(--text-muted)">Blood Donor</div>
+              </div>
+            </div>
+            
+            <!-- Emergency Actions -->
+            <div class="glass-card p-6 mb-6">
+              <h3 class="font-bold mb-4" style="font-family:'Outfit'"><i class="fas fa-bolt mr-2" style="color:var(--primary)"></i>Emergency Actions</h3>
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <button class="btn-danger py-4 emergency-glow" onclick="triggerSOS()">
+                  <i class="fas fa-phone-volume mr-2"></i>SOS Emergency
+                </button>
+                <button class="btn-warning py-4" onclick="callAmbulance()">
+                  <i class="fas fa-truck-medical mr-2"></i>Call 108 Ambulance
+                </button>
+                <button class="btn-accent py-4" onclick="shareLocation()">
+                  <i class="fas fa-location-crosshairs mr-2"></i>Share Location
+                </button>
+              </div>
+            </div>
+            
+            <!-- Recent Scan Activity -->
+            <div class="glass-card p-6">
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="font-bold" style="font-family:'Outfit'"><i class="fas fa-clock-rotate-left mr-2" style="color:var(--accent)"></i>Recent Scan Activity</h3>
+                <button class="text-xs font-semibold" style="color:var(--primary);background:none;border:none;cursor:pointer" onclick="showUserSection('scanLogs')">View All</button>
+              </div>
+              <div class="space-y-3">
+                <div class="flex items-center gap-3 p-3 rounded-lg" style="background:var(--bg-card-2)">
+                  <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background:rgba(230,57,70,0.1)">
+                    <i class="fas fa-hospital" style="color:var(--primary)"></i>
+                  </div>
+                  <div class="flex-1">
+                    <p class="text-sm font-semibold">AIIMS New Delhi</p>
+                    <p class="text-xs" style="color:var(--text-muted)">Emergency Access - 15 Jan 2025, 14:32</p>
+                  </div>
+                  <span class="badge badge-green">Verified</span>
+                </div>
+                <div class="flex items-center gap-3 p-3 rounded-lg" style="background:var(--bg-card-2)">
+                  <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background:rgba(42,157,143,0.1)">
+                    <i class="fas fa-truck-medical" style="color:var(--accent-2)"></i>
+                  </div>
+                  <div class="flex-1">
+                    <p class="text-sm font-semibold">Ambulance Service - Delhi</p>
+                    <p class="text-xs" style="color:var(--text-muted)">Critical Care Access - 12 Jan 2025, 09:15</p>
+                  </div>
+                  <span class="badge badge-green">Verified</span>
+                </div>
+                <div class="flex items-center gap-3 p-3 rounded-lg" style="background:var(--bg-card-2)">
+                  <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background:rgba(245,158,11,0.1)">
+                    <i class="fas fa-user" style="color:var(--accent)"></i>
+                  </div>
+                  <div class="flex-1">
+                    <p class="text-sm font-semibold">Unknown Scanner</p>
+                    <p class="text-xs" style="color:var(--text-muted)">Public View Only - 10 Jan 2025, 18:45</p>
+                  </div>
+                  <span class="badge badge-orange">Unverified</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Medical Info Section -->
+      <div id="section-medicalInfo" class="hidden fade-in">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div class="glass-card p-6">
+            <h3 class="font-bold mb-4" style="font-family:'Outfit'"><i class="fas fa-user mr-2" style="color:var(--accent)"></i>Personal Information</h3>
+            <div class="space-y-4">
+              <div class="grid grid-cols-2 gap-4">
+                <div><label class="text-xs font-semibold block mb-1" style="color:var(--text-muted)">Full Name</label><input class="input-field" value="Rahul "></div>
+                <div><label class="text-xs font-semibold block mb-1" style="color:var(--text-muted)">Date of Birth</label><input class="input-field" type="date" value="1990-05-15"></div>
+              </div>
+              <div class="grid grid-cols-2 gap-4">
+                <div><label class="text-xs font-semibold block mb-1" style="color:var(--text-muted)">Gender</label><select class="input-field"><option>Male</option><option>Female</option><option>Other</option></select></div>
+                <div><label class="text-xs font-semibold block mb-1" style="color:var(--text-muted)">Blood Group</label><select class="input-field"><option>A+</option><option>A-</option><option>B+</option><option selected>B-</option><option>AB+</option><option>AB-</option><option>O+</option><option>O-</option></select></div>
+              </div>
+              <div class="grid grid-cols-2 gap-4">
+                <div><label class="text-xs font-semibold block mb-1" style="color:var(--text-muted)">Height (cm)</label><input class="input-field" value="175"></div>
+                <div><label class="text-xs font-semibold block mb-1" style="color:var(--text-muted)">Weight (kg)</label><input class="input-field" value="72"></div>
+              </div>
+              <div><label class="text-xs font-semibold block mb-1" style="color:var(--text-muted)">Aadhaar Number (Last 4 digits)</label><input class="input-field" value="XXXX-XXXX-7842"></div>
+            </div>
+          </div>
+          
+          <div class="glass-card p-6">
+            <h3 class="font-bold mb-4" style="font-family:'Outfit'"><i class="fas fa-allergies mr-2" style="color:var(--primary)"></i>Allergies & Conditions</h3>
+            <div class="space-y-4">
+              <div>
+                <label class="text-xs font-semibold block mb-2" style="color:var(--text-muted)">Allergies</label>
+                <div class="flex flex-wrap gap-2 mb-2">
+                  <span class="badge badge-red">Penicillin</span>
+                  <span class="badge badge-red">Peanuts</span>
+                  <span class="badge badge-red">Dust Mites</span>
+                </div>
+                <div class="flex gap-2">
+                  <input class="input-field flex-1" placeholder="Add allergy..." id="allergyInput">
+                  <button class="btn-primary text-xs px-4" onclick="addItem('allergy')">Add</button>
+                </div>
+              </div>
+              <div>
+                <label class="text-xs font-semibold block mb-2" style="color:var(--text-muted)">Current Medications</label>
+                <div class="flex flex-wrap gap-2 mb-2">
+                  <span class="badge badge-blue">Metformin 500mg</span>
+                  <span class="badge badge-blue">Omeprazole 20mg</span>
+                </div>
+                <div class="flex gap-2">
+                  <input class="input-field flex-1" placeholder="Add medication..." id="medInput">
+                  <button class="btn-primary text-xs px-4" onclick="addItem('med')">Add</button>
+                </div>
+              </div>
+              <div>
+                <label class="text-xs font-semibold block mb-2" style="color:var(--text-muted)">Medical Conditions</label>
+                <div class="flex flex-wrap gap-2 mb-2">
+                  <span class="badge badge-orange">Type 2 Diabetes</span>
+                  <span class="badge badge-orange">Hypertension</span>
+                </div>
+                <div class="flex gap-2">
+                  <input class="input-field flex-1" placeholder="Add condition..." id="condInput">
+                  <button class="btn-primary text-xs px-4" onclick="addItem('cond')">Add</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="glass-card p-6">
+            <h3 class="font-bold mb-4" style="font-family:'Outfit'"><i class="fas fa-notes-medical mr-2" style="color:var(--accent-2)"></i>Insurance Information</h3>
+            <div class="space-y-4">
+              <div><label class="text-xs font-semibold block mb-1" style="color:var(--text-muted)">Insurance Provider</label><input class="input-field" value="Star Health Insurance"></div>
+              <div class="grid grid-cols-2 gap-4">
+                <div><label class="text-xs font-semibold block mb-1" style="color:var(--text-muted)">Policy Number</label><input class="input-field" value="SHI-2024-784521"></div>
+                <div><label class="text-xs font-semibold block mb-1" style="color:var(--text-muted)">Coverage Amount</label><input class="input-field" value="₹10,00,000"></div>
+              </div>
+              <div class="grid grid-cols-2 gap-4">
+                <div><label class="text-xs font-semibold block mb-1" style="color:var(--text-muted)">Valid Until</label><input class="input-field" type="date" value="2025-12-31"></div>
+                <div><label class="text-xs font-semibold block mb-1" style="color:var(--text-muted)">Cashless</label><select class="input-field"><option>Yes</option><option>No</option></select></div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="glass-card p-6">
+            <h3 class="font-bold mb-4" style="font-family:'Outfit'"><i class="fas fa-file-medical-alt mr-2" style="color:var(--info)"></i>Emergency Treatment Notes</h3>
+            <div class="space-y-3">
+              <textarea class="input-field" rows="4" placeholder="Critical notes for emergency responders...">Diabetic patient - check blood sugar before administering any IV. Allergic to penicillin-based antibiotics. Use alternative antibiotics only. BP medication must not be skipped.</textarea>
+              <div class="p-3 rounded-lg" style="background:rgba(230,57,70,0.08);border:1px solid rgba(230,57,70,0.15)">
+                <p class="text-xs font-semibold" style="color:var(--primary)"><i class="fas fa-exclamation-triangle mr-1"></i>Critical Alert</p>
+                <p class="text-xs mt-1" style="color:var(--text-muted)">This information is encrypted and only visible to authorized medical personnel</p>
+              </div>
+            </div>
+            <button class="btn-primary w-full mt-4" onclick="showToast('Medical information saved & encrypted successfully!','success')">
+              <i class="fas fa-save mr-2"></i>Save & Encrypt
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Emergency Contacts Section -->
+      <div id="section-emergencyContacts" class="hidden fade-in">
+        <div class="glass-card p-6 mb-6">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="font-bold" style="font-family:'Outfit'"><i class="fas fa-phone-volume mr-2" style="color:var(--primary)"></i>Emergency Contacts</h3>
+            <button class="btn-primary text-xs" onclick="addEmergencyContact()"><i class="fas fa-plus mr-1"></i>Add Contact</button>
+          </div>
+          <div class="space-y-3" id="emergencyContactsList">
+            <div class="flex items-center gap-4 p-4 rounded-lg hover-lift" style="background:var(--bg-card-2);border:1px solid var(--border)">
+              <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-pink-400 to-pink-600 flex items-center justify-center text-lg font-bold text-white">P</div>
+              <div class="flex-1">
+                <p class="font-semibold">Priya </p>
+                <p class="text-xs" style="color:var(--text-muted)">Spouse - +91 98765 43210</p>
+              </div>
+              <span class="badge badge-green">Primary</span>
+              <div class="flex gap-2">
+                <button class="w-8 h-8 rounded-lg flex items-center justify-center" style="background:rgba(42,157,143,0.1);border:none;cursor:pointer" onclick="showToast('Calling Priya ...','info')"><i class="fas fa-phone text-xs" style="color:var(--accent-2)"></i></button>
+                <button class="w-8 h-8 rounded-lg flex items-center justify-center" style="background:rgba(59,130,246,0.1);border:none;cursor:pointer" onclick="showToast('Sending SMS to Priya ...','info')"><i class="fas fa-message text-xs" style="color:var(--info)"></i></button>
+              </div>
+            </div>
+            <div class="flex items-center gap-4 p-4 rounded-lg hover-lift" style="background:var(--bg-card-2);border:1px solid var(--border)">
+              <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-lg font-bold text-white">A</div>
+              <div class="flex-1">
+                <p class="font-semibold">Amit</p>
+                <p class="text-xs" style="color:var(--text-muted)">Brother - +91 87654 32109</p>
+              </div>
+              <span class="badge badge-blue">Secondary</span>
+              <div class="flex gap-2">
+                <button class="w-8 h-8 rounded-lg flex items-center justify-center" style="background:rgba(42,157,143,0.1);border:none;cursor:pointer" onclick="showToast('Calling Amit ...','info')"><i class="fas fa-phone text-xs" style="color:var(--accent-2)"></i></button>
+                <button class="w-8 h-8 rounded-lg flex items-center justify-center" style="background:rgba(59,130,246,0.1);border:none;cursor:pointer" onclick="showToast('Sending SMS to Amit ...','info')"><i class="fas fa-message text-xs" style="color:var(--info)"></i></button>
+              </div>
+            </div>
+            <div class="flex items-center gap-4 p-4 rounded-lg hover-lift" style="background:var(--bg-card-2);border:1px solid var(--border)">
+              <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-lg font-bold text-white">D</div>
+              <div class="flex-1">
+                <p class="font-semibold">Dr. Deepak Verma</p>
+                <p class="text-xs" style="color:var(--text-muted)">Family Doctor - +91 76543 21098</p>
+              </div>
+              <span class="badge badge-teal">Doctor</span>
+              <div class="flex gap-2">
+                <button class="w-8 h-8 rounded-lg flex items-center justify-center" style="background:rgba(42,157,143,0.1);border:none;cursor:pointer" onclick="showToast('Calling Dr. Verma...','info')"><i class="fas fa-phone text-xs" style="color:var(--accent-2)"></i></button>
+                <button class="w-8 h-8 rounded-lg flex items-center justify-center" style="background:rgba(59,130,246,0.1);border:none;cursor:pointer" onclick="showToast('Sending SMS to Dr. Verma...','info')"><i class="fas fa-message text-xs" style="color:var(--info)"></i></button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="glass-card p-6">
+          <h3 class="font-bold mb-4" style="font-family:'Outfit'"><i class="fas fa-bell mr-2" style="color:var(--accent)"></i>Notification Settings</h3>
+          <div class="space-y-4">
+            <div class="flex items-center justify-between p-3 rounded-lg" style="background:var(--bg-card-2)">
+              <div><p class="text-sm font-semibold">QR Scan Alerts</p><p class="text-xs" style="color:var(--text-muted)">Get notified when your QR is scanned</p></div>
+              <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
+            </div>
+            <div class="flex items-center justify-between p-3 rounded-lg" style="background:var(--bg-card-2)">
+              <div><p class="text-sm font-semibold">Location Sharing</p><p class="text-xs" style="color:var(--text-muted)">Auto-share scan location with contacts</p></div>
+              <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
+            </div>
+            <div class="flex items-center justify-between p-3 rounded-lg" style="background:var(--bg-card-2)">
+              <div><p class="text-sm font-semibold">Geo-Fence Alerts</p><p class="text-xs" style="color:var(--text-muted)">Alert when in high-risk zones</p></div>
+              <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Scan Logs Section -->
+      <div id="section-scanLogs" class="hidden fade-in">
+        <div class="glass-card p-6 mb-6">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="font-bold" style="font-family:'Outfit'"><i class="fas fa-clock-rotate-left mr-2" style="color:var(--accent)"></i>Complete Scan History</h3>
+            <button class="btn-secondary text-xs" onclick="showToast('Exporting scan logs...','info')"><i class="fas fa-download mr-1"></i>Export</button>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="data-table">
+              <thead><tr>
+                <th>Date & Time</th><th>Scanner</th><th>Role</th><th>Purpose</th><th>Location</th><th>Status</th>
+              </tr></thead>
+              <tbody>
+                <tr><td>15 Jan 2025, 14:32</td><td>AIIMS New Delhi</td><td><span class="badge badge-red">Hospital</span></td><td>Emergency Treatment</td><td>28.5672°N, 77.2100°E</td><td><span class="badge badge-green">Verified</span></td></tr>
+                <tr><td>12 Jan 2025, 09:15</td><td>Ambulance Service Delhi</td><td><span class="badge badge-teal">Ambulance</span></td><td>Critical Care</td><td>28.6139°N, 77.2090°E</td><td><span class="badge badge-green">Verified</span></td></tr>
+                <tr><td>10 Jan 2025, 18:45</td><td>Unknown</td><td><span class="badge badge-orange">Public</span></td><td>Unknown</td><td>28.6304°N, 77.2177°E</td><td><span class="badge badge-orange">Limited</span></td></tr>
+                <tr><td>05 Jan 2025, 11:20</td><td>Apollo Hospital</td><td><span class="badge badge-red">Hospital</span></td><td>Routine Checkup</td><td>28.5504°N, 77.2400°E</td><td><span class="badge badge-green">Verified</span></td></tr>
+                <tr><td>28 Dec 2024, 16:00</td><td>Fortis Hospital</td><td><span class="badge badge-red">Hospital</span></td><td>Lab Reports</td><td>28.5485°N, 77.2500°E</td><td><span class="badge badge-green">Verified</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="glass-card p-6">
+          <h3 class="font-bold mb-4" style="font-family:'Outfit'"><i class="fas fa-shield-halved mr-2" style="color:var(--accent-2)"></i>Security Audit</h3>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="p-4 rounded-lg" style="background:var(--bg-card-2)">
+              <p class="text-2xl font-bold" style="font-family:'Outfit';color:var(--success)">5</p>
+              <p class="text-xs" style="color:var(--text-muted)">Verified Scans</p>
+            </div>
+            <div class="p-4 rounded-lg" style="background:var(--bg-card-2)">
+              <p class="text-2xl font-bold" style="font-family:'Outfit';color:var(--accent)">2</p>
+              <p class="text-xs" style="color:var(--text-muted)">Public Scans</p>
+            </div>
+            <div class="p-4 rounded-lg" style="background:var(--bg-card-2)">
+              <p class="text-2xl font-bold" style="font-family:'Outfit';color:var(--primary)">0</p>
+              <p class="text-xs" style="color:var(--text-muted)">Security Alerts</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Blood Donation Section -->
+      <div id="section-bloodDonation" class="hidden fade-in">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div class="glass-card p-6">
+            <div class="text-center mb-6">
+              <div class="inline-flex items-center justify-center w-20 h-20 rounded-full mb-4" style="background:rgba(230,57,70,0.1);border:2px solid rgba(230,57,70,0.3)">
+                <i class="fas fa-droplet text-3xl" style="color:var(--primary)"></i>
+              </div>
+              <h3 class="font-bold text-xl" style="font-family:'Outfit'">Blood Donation Status</h3>
+              <p class="text-sm mt-1" style="color:var(--text-muted)">Help save lives by being a donor</p>
+            </div>
+            <div class="flex items-center justify-between p-4 rounded-lg mb-4" style="background:var(--bg-card-2)">
+              <div>
+                <p class="font-semibold">Donation Availability</p>
+                <p class="text-xs" style="color:var(--text-muted)">Toggle to indicate your availability</p>
+              </div>
+              <div class="toggle-switch active" id="bloodDonorToggle" onclick="toggleBloodDonor()"></div>
+            </div>
+            <div class="grid grid-cols-2 gap-4 mb-4">
+              <div class="p-4 rounded-lg text-center" style="background:var(--bg-card-2)">
+                <p class="text-lg font-bold" style="font-family:'Outfit';color:var(--primary)">B+</p>
+                <p class="text-xs" style="color:var(--text-muted)">Your Blood Group</p>
+              </div>
+              <div class="p-4 rounded-lg text-center" style="background:var(--bg-card-2)">
+                <p class="text-lg font-bold" style="font-family:'Outfit';color:var(--success)">Available</p>
+                <p class="text-xs" style="color:var(--text-muted)">Current Status</p>
+              </div>
+            </div>
+            <div><label class="text-xs font-semibold block mb-1" style="color:var(--text-muted)">Last Donation Date</label><input class="input-field" type="date" value="2024-11-20"></div>
+            <div class="mt-3"><label class="text-xs font-semibold block mb-1" style="color:var(--text-muted)">Preferred Donation Center</label><select class="input-field"><option>AIIMS Blood Bank, New Delhi</option><option>Red Cross Blood Bank</option><option>Rotary Blood Bank</option></select></div>
+          </div>
+          <div class="glass-card p-6">
+            <h3 class="font-bold mb-4" style="font-family:'Outfit'"><i class="fas fa-chart-line mr-2" style="color:var(--accent)"></i>Donation History</h3>
+            <div class="space-y-3">
+              <div class="flex items-center gap-3 p-3 rounded-lg" style="background:var(--bg-card-2)">
+                <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background:rgba(16,185,129,0.1)"><i class="fas fa-check-circle" style="color:var(--success)"></i></div>
+                <div class="flex-1"><p class="text-sm font-semibold">AIIMS Blood Bank</p><p class="text-xs" style="color:var(--text-muted)">20 Nov 2024 - 450ml</p></div>
+              </div>
+              <div class="flex items-center gap-3 p-3 rounded-lg" style="background:var(--bg-card-2)">
+                <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background:rgba(16,185,129,0.1)"><i class="fas fa-check-circle" style="color:var(--success)"></i></div>
+                <div class="flex-1"><p class="text-sm font-semibold">Red Cross Blood Bank</p><p class="text-xs" style="color:var(--text-muted)">15 Jul 2024 - 450ml</p></div>
+              </div>
+              <div class="flex items-center gap-3 p-3 rounded-lg" style="background:var(--bg-card-2)">
+                <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background:rgba(16,185,129,0.1)"><i class="fas fa-check-circle" style="color:var(--success)"></i></div>
+                <div class="flex-1"><p class="text-sm font-semibold">Rotary TTK Blood Bank</p><p class="text-xs" style="color:var(--text-muted)">02 Mar 2024 - 350ml</p></div>
+              </div>
+            </div>
+            <div class="mt-4 p-4 rounded-lg" style="background:rgba(230,57,70,0.08);border:1px solid rgba(230,57,70,0.15)">
+              <p class="text-sm font-semibold" style="color:var(--primary)">Eligibility Status</p>
+              <p class="text-xs mt-1" style="color:var(--text-muted)">Next eligible donation: 20 Feb 2025 (56-day gap required)</p>
+              <div class="progress-bar mt-2"><div class="progress-fill" style="width:70%;background:linear-gradient(90deg,var(--primary),var(--accent))"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Chronic Diseases Section -->
+      <div id="section-chronicDiseases" class="hidden fade-in">
+        <div class="glass-card p-6 mb-6">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="font-bold" style="font-family:'Outfit'"><i class="fas fa-disease mr-2" style="color:var(--primary)"></i>Chronic Disease Information</h3>
+            <button class="btn-primary text-xs" onclick="addChronicDisease()"><i class="fas fa-plus mr-1"></i>Add Condition</button>
+          </div>
+          <div class="space-y-4">
+            <div class="p-4 rounded-lg" style="background:var(--bg-card-2);border:1px solid var(--border)">
+              <div class="flex items-center justify-between mb-2">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background:rgba(245,158,11,0.1)"><i class="fas fa-disease" style="color:var(--accent)"></i></div>
+                  <div><p class="font-semibold">Type 2 Diabetes Mellitus</p><p class="text-xs" style="color:var(--text-muted)">Diagnosed: 2018 | ICD-10: E11</p></div>
+                </div>
+                <span class="badge badge-orange">Active</span>
+              </div>
+              <div class="grid grid-cols-2 gap-3 mt-3">
+                <div class="p-2 rounded" style="background:var(--bg-card)"><p class="text-xs" style="color:var(--text-muted)">Current HbA1c</p><p class="text-sm font-bold">7.2%</p></div>
+                <div class="p-2 rounded" style="background:var(--bg-card)"><p class="text-xs" style="color:var(--text-muted)">Medication</p><p class="text-sm font-bold">Metformin 500mg BD</p></div>
+              </div>
+            </div>
+            <div class="p-4 rounded-lg" style="background:var(--bg-card-2);border:1px solid var(--border)">
+              <div class="flex items-center justify-between mb-2">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background:rgba(230,57,70,0.1)"><i class="fas fa-heart-pulse" style="color:var(--primary)"></i></div>
+                  <div><p class="font-semibold">Essential Hypertension</p><p class="text-xs" style="color:var(--text-muted)">Diagnosed: 2019 | ICD-10: I10</p></div>
+                </div>
+                <span class="badge badge-red">Active</span>
+              </div>
+              <div class="grid grid-cols-2 gap-3 mt-3">
+                <div class="p-2 rounded" style="background:var(--bg-card)"><p class="text-xs" style="color:var(--text-muted)">Current BP</p><p class="text-sm font-bold">138/88 mmHg</p></div>
+                <div class="p-2 rounded" style="background:var(--bg-card)"><p class="text-xs" style="color:var(--text-muted)">Medication</p><p class="text-sm font-bold">Amlodipine 5mg OD</p></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Geo Tracking Section -->
+      <div id="section-geoTracking" class="hidden fade-in">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div class="lg:col-span-2">
+            <div class="glass-card p-6">
+              <h3 class="font-bold mb-4" style="font-family:'Outfit'"><i class="fas fa-map-location-dot mr-2" style="color:var(--accent-2)"></i>Live Location Tracking</h3>
+              <div class="map-placeholder" style="min-height:350px">
+                <div class="map-grid"></div>
+                <div class="map-pin" style="top:45%;left:55%"></div>
+                <div class="map-pin" style="top:30%;left:35%;background:var(--accent-2);animation-delay:0.5s"></div>
+                <div class="map-pin" style="top:60%;left:70%;background:var(--accent);animation-delay:1s"></div>
+                <div class="text-center relative z-10">
+                  <div class="encrypt-shield mx-auto mb-3"><i class="fas fa-location-crosshairs"></i></div>
+                  <p class="text-sm font-semibold">Location Active</p>
+                  <p class="text-xs" style="color:var(--text-muted)">28.6139°N, 77.2090°E</p>
+                  <button class="btn-accent text-xs mt-3" onclick="getCurrentLocation()"><i class="fas fa-crosshairs mr-1"></i>Update Location</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="glass-card p-6 mb-6">
+              <h3 class="font-bold mb-4" style="font-family:'Outfit'"><i class="fas fa-triangle-exclamation mr-2" style="color:var(--accent)"></i>Geo-Trigger Alerts</h3>
+              <div class="space-y-3">
+                <div class="p-3 rounded-lg" style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.15)">
+                  <div class="flex items-center gap-2 mb-1">
+                    <span class="live-dot" style="background:var(--accent)"></span>
+                    <span class="text-xs font-semibold" style="color:var(--accent)">High-Risk Zone</span>
+                  </div>
+                  <p class="text-xs" style="color:var(--text-muted)">NH-48 Highway - Accident prone area detected</p>
+                </div>
+                <div class="p-3 rounded-lg" style="background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.15)">
+                  <div class="flex items-center gap-2 mb-1">
+                    <span class="live-dot"></span>
+                    <span class="text-xs font-semibold" style="color:var(--success)">Safe Zone</span>
+                  </div>
+                  <p class="text-xs" style="color:var(--text-muted)">Current location - within hospital zone</p>
+                </div>
+              </div>
+            </div>
+            <div class="glass-card p-6">
+              <h3 class="font-bold mb-3" style="font-family:'Outfit'"><i class="fas fa-location-arrow mr-2" style="color:var(--info)"></i>Location History</h3>
+              <div class="space-y-2">
+                <div class="p-2 rounded text-xs" style="background:var(--bg-card-2)">
+                  <p class="font-semibold">Connaught Place, Delhi</p>
+                  <p style="color:var(--text-muted)">15 Jan, 14:30</p>
+                </div>
+                <div class="p-2 rounded text-xs" style="background:var(--bg-card-2)">
+                  <p class="font-semibold">AIIMS, New Delhi</p>
+                  <p style="color:var(--text-muted)">15 Jan, 14:32</p>
+                </div>
+                <div class="p-2 rounded text-xs" style="background:var(--bg-card-2)">
+                  <p class="font-semibold">Home - Dwarka, Delhi</p>
+                  <p style="color:var(--text-muted)">15 Jan, 08:00</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Settings Section -->
+      <div id="section-userSettings" class="hidden fade-in">
+        <div class="glass-card p-6 max-w-2xl">
+          <h3 class="font-bold mb-6" style="font-family:'Outfit'"><i class="fas fa-gear mr-2" style="color:var(--text-muted)"></i>Account Settings</h3>
+          <div class="space-y-4">
+            <div class="flex items-center justify-between p-4 rounded-lg" style="background:var(--bg-card-2)">
+              <div><p class="text-sm font-semibold">Two-Factor Authentication</p><p class="text-xs" style="color:var(--text-muted)">Extra layer of security for your account</p></div>
+              <div class="toggle-switch active" onclick="this.classList.toggle('active');showToast('2FA setting updated','success')"></div>
+            </div>
+            <div class="flex items-center justify-between p-4 rounded-lg" style="background:var(--bg-card-2)">
+              <div><p class="text-sm font-semibold">Biometric Lock</p><p class="text-xs" style="color:var(--text-muted)">Use fingerprint/face to unlock app</p></div>
+              <div class="toggle-switch" onclick="this.classList.toggle('active');showToast('Biometric setting updated','success')"></div>
+              </div>
+            <div class="flex items-center justify-between p-4 rounded-lg" style="background:var(--bg-card-2)">
+              <div><p class="text-sm font-semibold">Data Encryption</p><p class="text-xs" style="color:var(--text-muted)">AES-256 encryption for all medical data</p></div>
+              <div class="toggle-switch active" onclick="showToast('Encryption cannot be disabled for security','warning')"></div>
+            </div>
+            <div class="p-4 rounded-lg" style="background:var(--bg-card-2)">
+              <p class="text-sm font-semibold mb-2">Emergency ID</p>
+              <div class="flex gap-2">
+                <input class="input-field flex-1" value="EHC-2024-IN-87432" readonly>
+                <button class="btn-secondary text-xs px-4" onclick="navigator.clipboard.writeText('EHC-2024-IN-87432');showToast('Emergency ID copied!','success')"><i class="fas fa-copy"></i></button>
+              </div>
+            </div>
+            <button class="btn-primary w-full" onclick="showToast('Settings saved successfully!','success')"><i class="fas fa-save mr-2"></i>Save Settings</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ HOSPITAL DASHBOARD ============ -->
+<div id="hospitalDashboard" class="hidden">
+  <nav class="sidebar" id="hospitalSidebar">
+    <div class="p-5 border-b" style="border-color:var(--border)">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-red-500 to-red-700 flex items-center justify-center">
+          <i class="fas fa-hospital text-white"></i>
+        </div>
+        <div>
+          <h3 class="font-bold text-sm" style="font-family:'Outfit'">MediShield</h3>
+          <p class="text-xs" style="color:var(--text-muted)">Hospital Portal</p>
+        </div>
+      </div>
+    </div>
+    <div class="py-4">
+      <div class="sidebar-link active" onclick="showHospitalSection('scanPatient')"><i class="fas fa-qrcode"></i>Scan Patient QR</div>
+      <div class="sidebar-link" onclick="showHospitalSection('patientRecords')"><i class="fas fa-file-medical"></i>Patient Records</div>
+      <div class="sidebar-link" onclick="showHospitalSection('emergencyAccess')"><i class="fas fa-unlock-emergency"></i>Emergency Access</div>
+      <div class="sidebar-link" onclick="showHospitalSection('hospitalLogs')"><i class="fas fa-list-check"></i>Access Logs</div>
+    </div>
+    <div class="absolute bottom-0 left-0 right-0 p-4 border-t" style="border-color:var(--border)">
+      <button class="btn-secondary w-full text-center text-sm" onclick="handleLogout()"><i class="fas fa-right-from-bracket mr-2"></i>Logout</button>
+    </div>
+  </nav>
+  
+  <div class="main-content" id="hospitalMain">
+    <div class="top-bar flex items-center justify-between px-6">
+      <div class="flex items-center gap-4">
+        <button class="md:hidden" onclick="toggleSidebar('hospitalSidebar')" style="background:none;border:none;color:var(--text);cursor:pointer"><i class="fas fa-bars text-lg"></i></button>
+        <h2 class="text-lg font-bold" style="font-family:'Outfit'" id="hospitalPageTitle">Scan Patient QR</h2>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="badge badge-green"><i class="fas fa-check-circle mr-1"></i>Verified Hospital</span>
+        <span class="text-sm font-medium">AIIMS New Delhi</span>
+      </div>
+    </div>
+    
+    <div class="p-6">
+      <!-- Scan Patient Section -->
+      <div id="hsection-scanPatient" class="fade-in">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div class="glass-card p-6">
+            <h3 class="font-bold mb-4" style="font-family:'Outfit'"><i class="fas fa-qrcode mr-2" style="color:var(--primary)"></i>Scan QR Code</h3>
+            <div class="p-8 rounded-xl text-center mb-4" style="background:var(--bg-card-2);border:2px dashed var(--border)">
+              <i class="fas fa-camera text-4xl mb-3" style="color:var(--text-muted)"></i>
+              <p class="text-sm" style="color:var(--text-muted)">Point camera at patient's QR code</p>
+              <button class="btn-primary mt-4" onclick="simulateScan()"><i class="fas fa-camera mr-2"></i>Scan QR Code</button>
+            </div>
+            <div class="p-3 rounded-lg" style="background:rgba(230,57,70,0.08);border:1px solid rgba(230,57,70,0.15)">
+              <p class="text-xs" style="color:var(--primary)"><i class="fas fa-shield-halved mr-1"></i>Authorized Access Only - All scans are logged and audited</p>
+            </div>
+          </div>
+          <div class="glass-card p-6">
+            <h3 class="font-bold mb-4" style="font-family:'Outfit'"><i class="fas fa-keyboard mr-2" style="color:var(--accent)"></i>Manual Entry</h3>
+            <div class="space-y-4">
+              <div><label class="text-xs font-semibold block mb-1" style="color:var(--text-muted)">Emergency ID</label><input class="input-field" placeholder="EHC-2024-IN-XXXXX" id="manualEmergId"></div>
+              <div><label class="text-xs font-semibold block mb-1" style="color:var(--text-muted)">Purpose of Access</label>
+                <select class="input-field" id="accessPurpose">
+                  <option>Emergency Treatment</option><option>Routine Checkup</option><option>Lab Reports</option><option>Surgery</option><option>ICU Admission</option>
+                </select>
+              </div>
+              <div><label class="text-xs font-semibold block mb-1" style="color:var(--text-muted)">Department</label><input class="input-field" value="Emergency Medicine"></div>
+              <button class="btn-primary w-full" onclick="searchPatient()"><i class="fas fa-search mr-2"></i>Search Patient</button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Scan Result (shown after scan) -->
+        <div id="scanResult" class="hidden mt-6">
+          <div class="glass-card p-6">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="font-bold" style="font-family:'Outfit'"><i class="fas fa-user-doctor mr-2" style="color:var(--accent-2)"></i>Patient Medical Record - Authorized View</h3>
+              <span class="badge badge-green"><i class="fas fa-lock-open mr-1"></i>Decrypted</span>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+              <div class="p-3 rounded-lg text-center" style="background:var(--bg-card-2)"><p class="text-xs" style="color:var(--text-muted)">Blood Group</p><p class="text-lg font-bold" style="color:var(--primary)">B+</p></div>
+              <div class="p-3 rounded-lg text-center" style="background:var(--bg-card-2)"><p class="text-xs" style="color:var(--text-muted)">Allergies</p><p class="text-sm font-bold" style="color:var(--accent)">3 Active</p></div>
+              <div class="p-3 rounded-lg text-center" style="background:var(--bg-card-2)"><p class="text-xs" style="color:var(--text-muted)">Medications</p><p class="text-sm font-bold" style="color:var(--info)">2 Active</p></div>
+              <div class="p-3 rounded-lg text-center" style="background:var(--bg-card-2)"><p class="text-xs" style="color:var(--text-muted)">Conditions</p><p class="text-sm font-bold" style="color:var(--accent-2)">2 Active</p></div>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div>
+                <h4 class="text-sm font-semibold mb-2" style="color:var(--accent)">Allergies</h4>
+                <div class="flex flex-wrap gap-2 mb-4"><span class="badge badge-red">Penicillin</span><span class="badge badge-red">Peanuts</span><span class="badge badge-red">Dust Mites</span></div>
+                <h4 class="text-sm font-semibold mb-2" style="color:var(--info)">Current Medications</h4>
+                <div class="flex flex-wrap gap-2 mb-4"><span class="badge badge-blue">Metformin 500mg</span><span class="badge badge-blue">Amlodipine 5mg</span></div>
+                <h4 class="text-sm font-semibold mb-2" style="color:var(--accent-2)">Chronic Diseases</h4>
+                <div class="flex flex-wrap gap-2"><span class="badge badge-teal">Type 2 Diabetes</span><span class="badge badge-teal">Hypertension</span></div>
+              </div>
+              <div>
+                <h4 class="text-sm font-semibold mb-2" style="color:var(--accent)">Insurance</h4>
+                <div class="p-3 rounded-lg mb-3" style="background:var(--bg-card-2)">
+                  <p class="text-xs" style="color:var(--text-muted)">Star Health Insurance | SHI-2024-784521</p>
+                  <p class="text-xs" style="color:var(--text-muted)">Coverage: ₹10,00,000 | Cashless: Yes</p>
+                </div>
+                <h4 class="text-sm font-semibold mb-2" style="color:var(--primary)">Emergency Notes</h4>
+                <div class="p-3 rounded-lg" style="background:rgba(230,57,70,0.08);border:1px solid rgba(230,57,70,0.15)">
+                  <p class="text-xs" style="color:var(--text)">Diabetic patient - check blood sugar before administering any IV. Allergic to penicillin-based antibiotics. BP medication must not be skipped.</p>
+                </div>
+              </div>
+            </div>
+            <div class="flex gap-3 mt-6">
+              <button class="btn-primary" onclick="showToast('Access logged. Patient & contacts notified.','success')"><i class="fas fa-check mr-2"></i>Confirm Access</button>
+              <button class="btn-secondary" onclick="document.getElementById('scanResult').classList.add('hidden')"><i class="fas fa-times mr-2"></i>Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Patient Records -->
+      <div id="hsection-patientRecords" class="hidden fade-in">
+        <div class="glass-card p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="font-bold" style="font-family:'Outfit'"><i class="fas fa-file-medical mr-2" style="color:var(--accent)"></i>Recent Patient Records</h3>
+            <div class="flex gap-2">
+              <input class="input-field text-xs" placeholder="Search patients..." style="width:200px">
+              <button class="btn-primary text-xs"><i class="fas fa-search"></i></button>
+            </div>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="data-table">
+              <thead><tr><th>Patient</th><th>ID</th><th>Blood</th><th>Last Access</th><th>Purpose</th><th>Action</th></tr></thead>
+              <tbody>
+                <tr><td>Rahul </td><td>EHC-2024-IN-87432</td><td><span class="badge badge-red">B+</span></td><td>15 Jan 2025</td><td>Emergency</td><td><button class="btn-primary text-xs py-1 px-3" onclick="simulateScan()">View</button></td></tr>
+                <tr><td>Anita </td><td>EHC-2024-IN-62190</td><td><span class="badge badge-red">O-</span></td><td>14 Jan 2025</td><td>Surgery</td><td><button class="btn-primary text-xs py-1 px-3">View</button></td></tr>
+                <tr><td>Vikram </td><td>EHC-2024-IN-43856</td><td><span class="badge badge-red">A+</span></td><td>13 Jan 2025</td><td>ICU</td><td><button class="btn-primary text-xs py-1 px-3">View</button></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Emergency Access -->
+      <div id="hsection-emergencyAccess" class="hidden fade-in">
+        <div class="glass-card p-6">
+          <h3 class="font-bold mb-4" style="font-family:'Outfit'"><i class="fas fa-unlock-emergency mr-2" style="color:var(--primary)"></i>Emergency Access Requests</h3>
+          <p class="text-sm mb-4" style="color:var(--text-muted)">Request temporary access to patient records in critical situations</p>
+          <div class="space-y-4">
+            <div class="p-4 rounded-lg" style="background:var(--bg-card-2);border:1px solid var(--border)">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-lg flex items-center justify-center emergency-pulse" style="background:rgba(230,57,70,0.2)"><i class="fas fa-exclamation" style="color:var(--primary)"></i></div>
+                  <div>
+                    <p class="font-semibold">Emergency Access - EHC-2024-IN-62190</p>
+                    <p class="text-xs" style="color:var(--text-muted)">Anita | Requested: 15 Jan 2025, 15:00</p>
+                  </div>
+                </div>
+                <div class="flex gap-2">
+                  <button class="btn-primary text-xs" onclick="showToast('Emergency access granted for 2 hours','success')">Grant</button>
+                  <button class="btn-secondary text-xs" onclick="showToast('Request denied','warning')">Deny</button>
+                </div>
+              </div>
+            </div>
+            <div class="p-4 rounded-lg" style="background:var(--bg-card-2);border:1px solid var(--border)">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background:rgba(16,185,129,0.1)"><i class="fas fa-check" style="color:var(--success)"></i></div>
+                  <div>
+                    <p class="font-semibold">Emergency Access - EHC-2024-IN-87432</p>
+                    <p class="text-xs" style="color:var(--text-muted)">Rahul  | Approved: 15 Jan 2025, 14:32</p>
+                  </div>
+                </div>
+                <span class="badge badge-green">Approved</span>
+              </div>
+            </div>
+          </div>
+          <div class="mt-6 p-4 rounded-lg" style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.15)">
+            <h4 class="text-sm font-semibold mb-2" style="color:var(--accent)">Request New Emergency Access</h4>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <input class="input-field text-xs" placeholder="Emergency ID">
+              <select class="input-field text-xs"><option>Critical Emergency</option><option>Life-Threatening</option><option>Accident Victim</option></select>
+              <button class="btn-warning text-xs" onclick="showToast('Emergency access request sent to admin','success')"><i class="fas fa-paper-plane mr-1"></i>Request Access</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Hospital Logs -->
+      <div id="hsection-hospitalLogs" class="hidden fade-in">
+        <div class="glass-card p-6">
+          <h3 class="font-bold mb-4" style="font-family:'Outfit'"><i class="fas fa-list-check mr-2" style="color:var(--accent-2)"></i>Hospital Access Logs</h3>
+          <div class="overflow-x-auto">
+            <table class="data-table">
+              <thead><tr><th>Date/Time</th><th>Patient</th><th>Doctor</th><th>Purpose</th><th>Department</th></tr></thead>
+              <tbody>
+                <tr><td>15 Jan 2025, 14:32</td><td>Rahul </td><td>Dr. Rajesh Kumar</td><td>Emergency</td><td>Emergency Medicine</td></tr>
+                <tr><td>14 Jan 2025, 11:15</td><td>Anita </td><td>Dr. Sanjay Gupta</td><td>Surgery</td><td>General Surgery</td></tr>
+                <tr><td>13 Jan 2025, 08:45</td><td>Vikram </td><td>Dr. Priya Nair</td><td>ICU</td><td>Critical Care</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ AMBULANCE DASHBOARD ============ -->
+<div id="ambulanceDashboard" class="hidden">
+  <nav class="sidebar" id="ambulanceSidebar">
+    <div class="p-5 border-b" style="border-color:var(--border)">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center">
+          <i class="fas fa-truck-medical text-white"></i>
+        </div>
+        <div>
+          <h3 class="font-bold text-sm" style="font-family:'Outfit'">MediShield</h3>
+          <p class="text-xs" style="color:var(--text-muted)">Ambulance Portal</p>
+        </div>
+      </div>
+    </div>
+    <div class="py-4">
+      <div class="sidebar-link active" onclick="showAmbulanceSection('quickScan')"><i class="fas fa-bolt"></i>Quick Scan</div>
+      <div class="sidebar-link" onclick="showAmbulanceSection('offlineMode')"><i class="fas fa-wifi-slash"></i>Offline Mode</div>
+      <div class="sidebar-link" onclick="showAmbulanceSection('gpsTracking')"><i class="fas fa-location-dot"></i>GPS Tracking</div>
+      <div class="sidebar-link" onclick="showAmbulanceSection('criticalInfo')"><i class="fas fa-heart-pulse"></i>Critical Info</div>
+    </div>
+    <div class="absolute bottom-0 left-0 right-0 p-4 border-t" style="border-color:var(--border)">
+      <button class="btn-secondary w-full text-center text-sm" onclick="handleLogout()"><i class="fas fa-right-from-bracket mr-2"></i>Logout</button>
+    </div>
+  </nav>
+  
+  <div class="main-content" id="ambulanceMain">
+    <div class="top-bar flex items-center justify-between px-6">
+      <div class="flex items-center gap-4">
+        <button class="md:hidden" onclick="toggleSidebar('ambulanceSidebar')" style="background:none;border:none;color:var(--text);cursor:pointer"><i class="fas fa-bars text-lg"></i></button>
+        <h2 class="text-lg font-bold" style="font-family:'Outfit'" id="ambulancePageTitle">Quick Scan</h2>
+      </div>
+      <div class="flex items-center gap-3">
+        <span class="badge badge-teal"><i class="fas fa-check-circle mr-1"></i>Verified</span>
+        <span class="live-dot"></span>
+        <span class="text-xs" style="color:var(--success)">Online</span>
+      </div>
+    </div>
+    
+    <div class="p-6">
+      <!-- Quick Scan -->
+      <div id="asection-quickScan" class="fade-in">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div class="glass-card p-6">
+            <div class="text-center mb-4">
+              <div class="inline-flex items-center justify-center w-20 h-20 rounded-full mb-4 emergency-pulse" style="background:rgba(230,57,70,0.15);border:2px solid var(--primary)">
+                <i class="fas fa-qrcode text-3xl" style="color:var(--primary)"></i>
+              </div>
+              <h3 class="font-bold text-xl" style="font-family:'Outfit'">Quick Emergency Scan</h3>
+              <p class="text-sm" style="color:var(--text-muted)">Scan patient QR for instant life-saving info</p>
+            </div>
+            <button class="btn-danger w-full py-4 emergency-glow text-lg" onclick="simulateAmbulanceScan()">
+              <i class="fas fa-camera mr-2"></i>SCAN NOW
+            </button>
+            <div class="mt-4 text-center">
+              <input class="input-field text-center" placeholder="Or enter Emergency ID manually" id="ambManualId">
+              <button class="btn-accent w-full mt-2" onclick="searchPatient()"><i class="fas fa-search mr-2"></i>Search</button>
+            </div>
+          </div>
+          
+          <!-- Ambulance scan result -->
+          <div id="ambScanResult" class="hidden">
+            <div class="glass-card p-6" style="border:2px solid var(--primary)">
+              <div class="flex items-center gap-2 mb-4">
+                <span class="live-dot" style="background:var(--primary)"></span>
+                <h3 class="font-bold" style="font-family:'Outfit';color:var(--primary)">CRITICAL PATIENT DATA</h3>
+              </div>
+              <div class="grid grid-cols-3 gap-3 mb-4">
+                <div class="p-3 rounded-lg text-center" style="background:rgba(230,57,70,0.1)"><p class="text-xs" style="color:var(--text-muted)">Blood</p><p class="text-xl font-bold" style="color:var(--primary)">B+</p></div>
+                <div class="p-3 rounded-lg text-center" style="background:rgba(245,158,11,0.1)"><p class="text-xs" style="color:var(--text-muted)">Allergies</p><p class="text-sm font-bold" style="color:var(--accent)">3 Found</p></div>
+                <div class="p-3 rounded-lg text-center" style="background:rgba(42,157,143,0.1)"><p class="text-xs" style="color:var(--text-muted)">Conditions</p><p class="text-sm font-bold" style="color:var(--accent-2)">2 Active</p></div>
+              </div>
+              <div class="p-3 rounded-lg mb-2" style="background:rgba(230,57,70,0.08);border:1px solid rgba(230,57,70,0.2)">
+                <p class="text-xs font-semibold" style="color:var(--primary)"><i class="fas fa-exclamation-triangle mr-1"></i>CRITICAL ALLERGIES</p>
+                <p class="text-sm mt-1">Penicillin, Peanuts, Dust Mites</p>
+              </div>
+              <div class="p-3 rounded-lg mb-2" style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2)">
+                <p class="text-xs font-semibold" style="color:var(--accent)"><i class="fas fa-pills mr-1"></i>CURRENT MEDICATIONS</p>
+                <p class="text-sm mt-1">Metformin 500mg, Amlodipine 5mg</p>
+              </div>
+              <div class="p-3 rounded-lg" style="background:rgba(42,157,143,0.08);border:1px solid rgba(42,157,143,0.2)">
+                <p class="text-xs font-semibold" style="color:var(--accent-2)"><i class="fas fa-disease mr-1"></i>CHRONIC CONDITIONS</p>
+                <p class="text-sm mt-1">Type 2 Diabetes, Hypertension</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Offline Mode -->
+      <div id="asection-offlineMode" class="hidden fade-in">
+        <div class="glass-card p-6 mb-6">
+          <div class="flex items-center gap-4 mb-4">
+            <div class="w-14 h-14 rounded-xl flex items-center justify-center" style="background:rgba(245,158,11,0.15)">
+              <i class="fas fa-wifi-slash text-2xl" style="color:var(--accent)"></i>
+            </div>
+            <div>
+              <h3 class="font-bold" style="font-family:'Outfit'">Offline Emergency Mode</h3>
+              <p class="text-sm" style="color:var(--text-muted)">Access critical data without internet connection</p>
+            </div>
+          </div>
+          <div class="p-4 rounded-lg mb-4" style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.15)">
+            <p class="text-sm font-semibold" style="color:var(--accent)"><i class="fas fa-info-circle mr-1"></i>How Offline Mode Works</p>
+            <p class="text-xs mt-1" style="color:var(--text-muted)">Essential emergency data is stored securely on the QR code itself. When scanned without internet, critical life-saving information is decrypted and displayed. Access logs are stored locally and synced automatically when connectivity is restored.</p>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="p-4 rounded-lg text-center hover-lift" style="background:var(--bg-card-2);border:1px solid var(--border)">
+              <i class="fas fa-database text-2xl mb-2" style="color:var(--accent-2)"></i>
+              <p class="text-sm font-semibold">3 Records</p>
+              <p class="text-xs" style="color:var(--text-muted)">Cached Offline</p>
+            </div>
+            <div class="p-4 rounded-lg text-center hover-lift" style="background:var(--bg-card-2);border:1px solid var(--border)">
+              <i class="fas fa-clock text-2xl mb-2" style="color:var(--accent)"></i>
+              <p class="text-sm font-semibold">2 Pending</p>
+              <p class="text-xs" style="color:var(--text-muted)">Logs to Sync</p>
+            </div>
+            <div class="p-4 rounded-lg text-center hover-lift" style="background:var(--bg-card-2);border:1px solid var(--border)">
+              <i class="fas fa-shield-halved text-2xl mb-2" style="color:var(--success)"></i>
+              <p class="text-sm font-semibold">Encrypted</p>
+              <p class="text-xs" style="color:var(--text-muted)">Local Storage</p>
+            </div>
+          </div>
+          <button class="btn-warning w-full mt-4" onclick="toggleOfflineMode()"><i class="fas fa-power-off mr-2"></i>Toggle Offline Mode</button>
+        </div>
+      </div>
+      
+      <!-- GPS Tracking -->
+      <div id="asection-gpsTracking" class="hidden fade-in">
+        <div class="glass-card p-6">
+          <h3 class="font-bold mb-4" style="font-family:'Outfit'"><i class="fas fa-location-dot mr-2" style="color:var(--accent-2)"></i>GPS Tracking & Route</h3>
+          <div class="map-placeholder" style="min-height:300px">
+            <div class="map-grid"></div>
+            <div class="map-pin" style="top:40%;left:45%;background:var(--accent-2)"></div>
+            <div class="map-pin" style="top:55%;left:60%"></div>
+            <div class="text-center relative z-10">
+              <p class="text-sm font-semibold">Ambulance DL-08-AB-1234</p>
+              <p class="text-xs" style="color:var(--text-muted)">En route to AIIMS New Delhi</p>
+              <p class="text-xs mt-1" style="color:var(--accent-2)">ETA: 8 minutes</p>
+            </div>
+          </div>
+          <div class="grid grid-cols-3 gap-4 mt-4">
+            <div class="p-3 rounded-lg text-center" style="background:var(--bg-card-2)">
+              <p class="text-xs" style="color:var(--text-muted)">Speed</p>
+              <p class="font-bold" style="color:var(--accent-2)">62 km/h</p>
+            </div>
+            <div class="p-3 rounded-lg text-center" style="background:var(--bg-card-2)">
+              <p class="text-xs" style="color:var(--text-muted)">Distance</p>
+              <p class="font-bold" style="color:var(--accent)">4.2 km</p>
+            </div>
+            <div class="p-3 rounded-lg text-center" style="background:var(--bg-card-2)">
+              <p class="text-xs" style="color:var(--text-muted)">ETA</p>
+              <p class="font-bold" style="color:var(--primary)">8 min</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Critical Info -->
+      <div id="asection-criticalInfo" class="hidden fade-in">
+        <div class="glass-card p-6">
+          <h3 class="font-bold mb-4" style="font-family:'Outfit'"><i class="fas fa-heart-pulse mr-2" style="color:var(--primary)"></i>Critical Information Quick Reference</h3>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="p-4 rounded-lg" style="background:rgba(230,57,70,0.08);border:1px solid rgba(230,57,70,0.2)">
+              <h4 class="text-sm font-semibold mb-2" style="color:var(--primary)"><i class="fas fa-phone mr-1"></i>Emergency Numbers</h4>
+              <div class="space-y-2">
+                <div class="flex justify-between text-sm"><span>Ambulance</span><span class="font-bold" style="color:var(--primary)">108</span></div>
+                <div class="flex justify-between text-sm"><span>Emergency</span><span class="font-bold" style="color:var(--primary)">112</span></div>
+                <div class="flex justify-between text-sm"><span>Blood Bank</span><span class="font-bold" style="color:var(--primary)">104</span></div>
+              </div>
+            </div>
+            <div class="p-4 rounded-lg" style="background:rgba(42,157,143,0.08);border:1px solid rgba(42,157,143,0.2)">
+              <h4 class="text-sm font-semibold mb-2" style="color:var(--accent-2)"><i class="fas fa-hospital mr-1"></i>Nearest Hospitals</h4>
+              <div class="space-y-2">
+                <div class="text-sm">AIIMS - <span class="font-bold">2.1 km</span></div>
+                <div class="text-sm">Safdarjung - <span class="font-bold">3.4 km</span></div>
+                <div class="text-sm">Apollo - <span class="font-bold">5.7 km</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ ADMIN DASHBOARD ============ -->
+<div id="adminDashboard" class="hidden">
+  <nav class="sidebar" id="adminSidebar">
+    <div class="p-5 border-b" style="border-color:var(--border)">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
+          <i class="fas fa-shield text-white"></i>
+        </div>
+        <div>
+          <h3 class="font-bold text-sm" style="font-family:'Outfit'">MediShield</h3>
+          <p class="text-xs" style="color:var(--text-muted)">Admin Panel</p>
+        </div>
+      </div>
+    </div>
+    <div class="py-4">
+      <div class="sidebar-link active" onclick="showAdminSection('overview')"><i class="fas fa-chart-pie"></i>Overview</div>
+      <div class="sidebar-link" onclick="showAdminSection('userManagement')"><i class="fas fa-users-gear"></i>User Management</div>
+      <div class="sidebar-link" onclick="showAdminSection('roleManagement')"><i class="fas fa-user-tag"></i>Role Management</div>
+      <div class="sidebar-link" onclick="showAdminSection('auditTrail')"><i class="fas fa-fingerprint"></i>Audit Trail</div>
+      <div class="sidebar-link" onclick="showAdminSection('systemSettings')"><i class="fas fa-server"></i>System Settings</div>
+    </div>
+    <div class="absolute bottom-0 left-0 right-0 p-4 border-t" style="border-color:var(--border)">
+      <button class="btn-secondary w-full text-center text-sm" onclick="handleLogout()"><i class="fas fa-right-from-bracket mr-2"></i>Logout</button>
+    </div>
+  </nav>
+  
+  <div class="main-content" id="adminMain">
+    <div class="top-bar flex items-center justify-between px-6">
+      <div class="flex items-center gap-4">
+        <button class="md:hidden" onclick="toggleSidebar('adminSidebar')" style="background:none;border:none;color:var(--text);cursor:pointer"><i class="fas fa-bars text-lg"></i></button>
+        <h2 class="text-lg font-bold" style="font-family:'Outfit'" id="adminPageTitle">Overview</h2>
+      </div>
+      <span class="badge badge-blue"><i class="fas fa-crown mr-1"></i>Super Admin</span>
+    </div>
+    
+    <div class="p-6">
+      <!-- Overview -->
+      <div id="adsection-overview" class="fade-in">
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          <div class="stat-card red">
+            <div class="flex items-center justify-between mb-2">
+              <i class="fas fa-users" style="color:var(--primary);font-size:20px"></i>
+              <span class="text-xs" style="color:var(--success)"><i class="fas fa-arrow-up mr-1"></i>12%</span>
+            </div>
+            <p class="text-3xl font-bold" style="font-family:'Outfit'">24,891</p>
+            <p class="text-xs" style="color:var(--text-muted)">Total Users</p>
+          </div>
+          <div class="stat-card teal">
+            <div class="flex items-center justify-between mb-2">
+              <i class="fas fa-hospital" style="color:var(--accent-2);font-size:20px"></i>
+              <span class="text-xs" style="color:var(--success)"><i class="fas fa-arrow-up mr-1"></i>8%</span>
+            </div>
+            <p class="text-3xl font-bold" style="font-family:'Outfit'">1,247</p>
+            <p class="text-xs" style="color:var(--text-muted)">Hospitals</p>
+          </div>
+          <div class="stat-card orange">
+            <div class="flex items-center justify-between mb-2">
+              <i class="fas fa-truck-medical" style="color:var(--accent);font-size:20px"></i>
+              <span class="text-xs" style="color:var(--success)"><i class="fas fa-arrow-up mr-1"></i>15%</span>
+            </div>
+            <p class="text-3xl font-bold" style="font-family:'Outfit'">3,456</p>
+            <p class="text-xs" style="color:var(--text-muted)">Ambulance Staff</p>
+          </div>
+          <div class="stat-card blue">
+            <div class="flex items-center justify-between mb-2">
+              <i class="fas fa-qrcode" style="color:var(--info);font-size:20px"></i>
+              <span class="text-xs" style="color:var(--success)"><i class="fas fa-arrow-up mr-1"></i>22%</span>
+            </div>
+            <p class="text-3xl font-bold" style="font-family:'Outfit'">89,432</p>
+            <p class="text-xs" style="color:var(--text-muted)">QR Scans Today</p>
+          </div>
+        </div>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div class="glass-card p-6">
+            <h3 class="font-bold mb-4" style="font-family:'Outfit'"><i class="fas fa-chart-bar mr-2" style="color:var(--accent)"></i>Scan Activity (Last 7 Days)</h3>
+            <canvas id="adminChart" height="200"></canvas>
+          </div>
+          <div class="glass-card p-6">
+            <h3 class="font-bold mb-4" style="font-family:'Outfit'"><i class="fas fa-bell mr-2" style="color:var(--primary)"></i>Recent Alerts</h3>
+            <div class="space-y-3">
+              <div class="flex items-center gap-3 p-3 rounded-lg" style="background:rgba(230,57,70,0.08);border:1px solid rgba(230,57,70,0.15)">
+                <i class="fas fa-exclamation-circle" style="color:var(--primary)"></i>
+                <div class="flex-1"><p class="text-sm font-semibold">Unauthorized access attempt</p><p class="text-xs" style="color:var(--text-muted)">EHC-2024-IN-87432 - 2 min ago</p></div>
+              </div>
+              <div class="flex items-center gap-3 p-3 rounded-lg" style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.15)">
+                <i class="fas fa-key" style="color:var(--accent)"></i>
+                <div class="flex-1"><p class="text-sm font-semibold">Emergency access request pending</p><p class="text-xs" style="color:var(--text-muted)">AIIMS Delhi - 5 min ago</p></div>
+              </div>
+              <div class="flex items-center gap-3 p-3 rounded-lg" style="background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.15)">
+                <i class="fas fa-hospital" style="color:var(--success)"></i>
+                <div class="flex-1"><p class="text-sm font-semibold">New hospital verified</p><p class="text-xs" style="color:var(--text-muted)">Fortis Hospital, Gurugram - 1 hr ago</p></div>
+              </div>
+              <div class="flex items-center gap-3 p-3 rounded-lg" style="background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.15)">
+                <i class="fas fa-user-plus" style="color:var(--info)"></i>
+                <div class="flex-1"><p class="text-sm font-semibold">150 new users registered today</p><p class="text-xs" style="color:var(--text-muted)">System - 3 hrs ago</p></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- User Management -->
+      <div id="adsection-userManagement" class="hidden fade-in">
+        <div class="glass-card p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="font-bold" style="font-family:'Outfit'"><i class="fas fa-users-gear mr-2" style="color:var(--accent)"></i>User Management</h3>
+            <div class="flex gap-2">
+              <input class="input-field text-xs" placeholder="Search users..." style="width:200px">
+              <button class="btn-primary text-xs"><i class="fas fa-plus mr-1"></i>Add User</button>
+            </div>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="data-table">
+              <thead><tr><th>Name</th><th>ID</th><th>Role</th><th>Status</th><th>Last Active</th><th>Actions</th></tr></thead>
+              <tbody>
+                <tr><td>Rahul </td><td>EHC-2024-IN-87432</td><td><span class="badge badge-orange">User</span></td><td><span class="badge badge-green">Active</span></td><td>15 Jan 2025</td><td><button class="btn-secondary text-xs py-1 px-2">Edit</button></td></tr>
+                <tr><td>AIIMS Delhi</td><td>HOS-2024-001</td><td><span class="badge badge-red">Hospital</span></td><td><span class="badge badge-green">Verified</span></td><td>15 Jan 2025</td><td><button class="btn-secondary text-xs py-1 px-2">Edit</button></td></tr>
+                <tr><td>Ambulance DL-08</td><td>AMB-2024-045</td><td><span class="badge badge-teal">Ambulance</span></td><td><span class="badge badge-green">Active</span></td><td>15 Jan 2025</td><td><button class="btn-secondary text-xs py-1 px-2">Edit</button></td></tr>
+                <tr><td>Dr. Meera Joshi</td><td>ADM-2024-003</td><td><span class="badge badge-blue">Admin</span></td><td><span class="badge badge-green">Active</span></td><td>14 Jan 2025</td><td><button class="btn-secondary text-xs py-1 px-2">Edit</button></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Role Management -->
+      <div id="adsection-roleManagement" class="hidden fade-in">
+        <div class="glass-card p-6">
+          <h3 class="font-bold mb-4" style="font-family:'Outfit'"><i class="fas fa-user-tag mr-2" style="color:var(--info)"></i>Role-Based Access Control</h3>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="p-4 rounded-lg hover-lift" style="background:var(--bg-card-2);border:1px solid var(--border)">
+              <div class="flex items-center gap-3 mb-3">
+                <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background:rgba(244,162,97,0.15)"><i class="fas fa-user" style="color:var(--accent)"></i></div>
+                <div><p class="font-semibold">User</p><p class="text-xs" style="color:var(--text-muted)">24,891 accounts</p></div>
+              </div>
+              <div class="space-y-1 text-xs">
+                <p><i class="fas fa-check text-green-400 mr-1"></i>View own health card</p>
+                <p><i class="fas fa-check text-green-400 mr-1"></i>Edit medical info</p>
+                <p><i class="fas fa-check text-green-400 mr-1"></i>Manage contacts</p>
+                <p><i class="fas fa-check text-green-400 mr-1"></i>Toggle blood donor</p>
+                <p><i class="fas fa-xmark text-red-400 mr-1"></i>Access other records</p>
+              </div>
+            </div>
+            <div class="p-4 rounded-lg hover-lift" style="background:var(--bg-card-2);border:1px solid var(--border)">
+              <div class="flex items-center gap-3 mb-3">
+                <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background:rgba(230,57,70,0.15)"><i class="fas fa-hospital" style="color:var(--primary)"></i></div>
+                <div><p class="font-semibold">Hospital</p><p class="text-xs" style="color:var(--text-muted)">1,247 verified</p></div>
+              </div>
+              <div class="space-y-1 text-xs">
+                <p><i class="fas fa-check text-green-400 mr-1"></i>Scan & decrypt QR</p>
+                <p><i class="fas fa-check text-green-400 mr-1"></i>View full records</p>
+                <p><i class="fas fa-check text-green-400 mr-1"></i>Request emergency access</p>
+                <p><i class="fas fa-check text-green-400 mr-1"></i>Update treatment notes</p>
+                <p><i class="fas fa-xmark text-red-400 mr-1"></i>Admin functions</p>
+              </div>
+            </div>
+            <div class="p-4 rounded-lg hover-lift" style="background:var(--bg-card-2);border:1px solid var(--border)">
+              <div class="flex items-center gap-3 mb-3">
+                <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background:rgba(42,157,143,0.15)"><i class="fas fa-truck-medical" style="color:var(--accent-2)"></i></div>
+                <div><p class="font-semibold">Ambulance</p><p class="text-xs" style="color:var(--text-muted)">3,456 staff</p></div>
+              </div>
+              <div class="space-y-1 text-xs">
+                <p><i class="fas fa-check text-green-400 mr-1"></i>Quick scan QR</p>
+                <p><i class="fas fa-check text-green-400 mr-1"></i>View critical info</p>
+                <p><i class="fas fa-check text-green-400 mr-1"></i>Offline access</p>
+                <p><i class="fas fa-check text-green-400 mr-1"></i>GPS tracking</p>
+                <p><i class="fas fa-xmark text-red-400 mr-1"></i>Edit medical records</p>
+              </div>
+            </div>
+            <div class="p-4 rounded-lg hover-lift" style="background:var(--bg-card-2);border:1px solid var(--border)">
+              <div class="flex items-center gap-3 mb-3">
+                <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background:rgba(59,130,246,0.15)"><i class="fas fa-shield" style="color:var(--info)"></i></div>
+                <div><p class="font-semibold">Admin</p><p class="text-xs" style="color:var(--text-muted)">12 accounts</p></div>
+              </div>
+              <div class="space-y-1 text-xs">
+                <p><i class="fas fa-check text-green-400 mr-1"></i>Full system access</p>
+                <p><i class="fas fa-check text-green-400 mr-1"></i>User management</p>
+                <p><i class="fas fa-check text-green-400 mr-1"></i>Audit trail access</p>
+                <p><i class="fas fa-check text-green-400 mr-1"></i>System configuration</p>
+                <p><i class="fas fa-check text-green-400 mr-1"></i>Approve verifications</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Audit Trail -->
+      <div id="adsection-auditTrail" class="hidden fade-in">
+        <div class="glass-card p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="font-bold" style="font-family:'Outfit'"><i class="fas fa-fingerprint mr-2" style="color:var(--accent-2)"></i>Secure Audit Trail</h3>
+            <div class="flex gap-2">
+              <select class="input-field text-xs" style="width:120px"><option>All Roles</option><option>User</option><option>Hospital</option><option>Ambulance</option><option>Admin</option></select>
+              <button class="btn-secondary text-xs"><i class="fas fa-download mr-1"></i>Export</button>
+            </div>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="data-table">
+              <thead><tr><th>Timestamp</th><th>User</th><th>Action</th><th>Target</th><th>IP</th><th>Location</th><th>Risk</th></tr></thead>
+              <tbody>
+                <tr><td>15 Jan 15:32:14</td><td>AIIMS Delhi</td><td>QR_SCAN_AUTH</td><td>EHC-2024-IN-87432</td><td>103.45.xx.xx</td><td>New Delhi</td><td><span class="badge badge-green">Low</span></td></tr>
+                <tr><td>15 Jan 15:30:02</td><td>Unknown</td><td>QR_SCAN_UNAUTH</td><td>EHC-2024-IN-87432</td><td>45.67.xx.xx</td><td>Unknown</td><td><span class="badge badge-red">High</span></td></tr>
+                <tr><td>15 Jan 14:15:33</td><td>Amb DL-08</td><td>QR_SCAN_AUTH</td><td>EHC-2024-IN-62190</td><td>103.45.xx.xx</td><td>Delhi NCR</td><td><span class="badge badge-green">Low</span></td></tr>
+                <tr><td>15 Jan 13:45:11</td><td>Admin</td><td>ROLE_CHANGE</td><td>HOS-2024-012</td><td>103.45.xx.xx</td><td>Mumbai</td><td><span class="badge badge-orange">Medium</span></td></tr>
+                <tr><td>15 Jan 12:00:00</td><td>System</td><td>ENCRYPTION_ROTATE</td><td>ALL_RECORDS</td><td>Internal</td><td>Server</td><td><span class="badge badge-green">Low</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      
+      <!-- System Settings -->
+      <div id="adsection-systemSettings" class="hidden fade-in">
+        <div class="glass-card p-6 max-w-3xl">
+          <h3 class="font-bold mb-6" style="font-family:'Outfit'"><i class="fas fa-server mr-2" style="color:var(--text-muted)"></i>System Configuration</h3>
+          <div class="space-y-4">
+            <div class="flex items-center justify-between p-4 rounded-lg" style="background:var(--bg-card-2)">
+              <div><p class="text-sm font-semibold">AES-256 Encryption</p><p class="text-xs" style="color:var(--text-muted)">All medical data encrypted at rest and in transit</p></div>
+              <div class="toggle-switch active" onclick="showToast('Encryption is mandatory and cannot be disabled','warning')"></div>
+            </div>
+            <div class="flex items-center justify-between p-4 rounded-lg" style="background:var(--bg-card-2)">
+              <div><p class="text-sm font-semibold">Auto-Location Sharing</p><p class="text-xs" style="color:var(--text-muted)">Share scan location with emergency contacts</p></div>
+              <div class="toggle-switch active" onclick="this.classList.toggle('active');showToast('Setting updated','success')"></div>
+            </div>
+            <div class="flex items-center justify-between p-4 rounded-lg" style="background:var(--bg-card-2)">
+              <div><p class="text-sm font-semibold">Geo-Trigger Alerts</p><p class="text-xs" style="color:var(--text-muted)">Alert when scan occurs in high-risk zone</p></div>
+              <div class="toggle-switch active" onclick="this.classList.toggle('active');showToast('Setting updated','success')"></div>
+            </div>
+            <div class="flex items-center justify-between p-4 rounded-lg" style="background:var(--bg-card-2)">
+              <div><p class="text-sm font-semibold">Offline Mode Sync</p><p class="text-xs" style="color:var(--text-muted)">Auto-sync offline access logs on reconnection</p></div>
+              <div class="toggle-switch active" onclick="this.classList.toggle('active');showToast('Setting updated','success')"></div>
+            </div>
+            <div class="p-4 rounded-lg" style="background:var(--bg-card-2)">
+              <p class="text-sm font-semibold mb-2">Emergency Access Duration</p>
+              <select class="input-field text-sm"><option>2 Hours</option><option>4 Hours</option><option>8 Hours</option><option>24 Hours</option></select>
+            </div>
+            <button class="btn-primary w-full" onclick="showToast('System settings saved successfully!','success')"><i class="fas fa-save mr-2"></i>Save System Settings</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ PUBLIC SCAN MODAL ============ -->
+<div id="publicScanModal" class="hidden">
+  <div class="modal-overlay" onclick="closePublicScan(event)">
+    <div class="modal-content p-6" onclick="event.stopPropagation()">
+      <div class="text-center mb-6">
+        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full mb-4" style="background:rgba(245,158,11,0.15);border:2px solid rgba(245,158,11,0.3)">
+          <i class="fas fa-eye-slash text-2xl" style="color:var(--accent)"></i>
+        </div>
+        <h2 class="text-xl font-bold" style="font-family:'Outfit'">Limited Public View</h2>
+        <p class="text-sm" style="color:var(--text-muted)">You are viewing this as an unverified user</p>
+      </div>
+      
+      <div class="glass-card-2 p-4 mb-4">
+        <div class="flex items-center gap-4 mb-3">
+          <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-2xl font-bold text-black">R</div>
+          <div>
+            <h3 class="font-bold text-lg">Rahul </h3>
+            <p class="text-xs" style="color:var(--text-muted)">Emergency ID: EHC-2024-IN-87432</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="p-4 rounded-lg mb-3" style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.15)">
+        <p class="text-xs" style="color:var(--accent)"><i class="fas fa-lock mr-1"></i>Medical records are encrypted. Only verified hospitals and emergency responders can access full data.</p>
+      </div>
+      
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+        <button class="btn-accent py-3" onclick="showToast('Calling emergency contact...','info')">
+          <i class="fas fa-phone mr-2"></i>Emergency Contact
+        </button>
+        <button class="btn-danger py-3" onclick="showToast('Connecting to 108 Ambulance Service...','info')">
+          <i class="fas fa-truck-medical mr-2"></i>Call Ambulance 108
+        </button>
+      </div>
+      
+      <div class="flex items-center justify-between p-3 rounded-lg" style="background:var(--bg-card-2)">
+        <div>
+          <p class="text-sm font-semibold">Blood Donation Status</p>
+          <p class="text-xs" style="color:var(--text-muted)">Contact if blood donation needed</p>
+        </div></div>
+      
+      <div class="flex items-center justify-between p-3 rounded-lg" style="background:var(--bg-card-2)">
+        <div>
+          <p class="text-sm font-semibold">Blood Donation Status</p>
+          <p class="text-xs" style="color:var(--text-muted)">Contact if blood donation needed</p>
+        </div>
+        <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
+      </div>
+      
+      <div class="mt-4 p-3 rounded-lg" style="background:rgba(230,57,70,0.08);border:1px solid rgba(230,57,70,0.15)">
+        <p class="text-xs font-semibold" style="color:var(--primary)"><i class="fas fa-shield-halved mr-1"></i>Hidden Information</p>
+        <p class="text-xs mt-1" style="color:var(--text-muted)">Blood Group, Allergies, Medical Conditions, Medications, Insurance, Medical History, Emergency Notes - All encrypted and hidden from public view.</p>
+      </div>
+      
+      <button class="btn-secondary w-full mt-4" onclick="document.getElementById('publicScanModal').classList.add('hidden')"><i class="fas fa-times mr-2"></i>Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ JAVASCRIPT ============ -->
+<script>
+// ===== App State =====
+const appState = {
+  currentRole: null,
+  isLoggedIn: false,
+  isOffline: false,
+  currentUser: {
+    name: 'Rahul ',
+    id: 'EHC-2024-IN-87432',
+    bloodGroup: 'B+',
+    email: 'rahul.123@email.com',
+    phone: '+91 98765 43210'
+  },
+  scanLogs: [],
+  encryptionKey: null
+};
+
+// ===== Toast Notification System =====
+function showToast(message, type = 'info') {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  const icons = { success: 'fa-check-circle', error: 'fa-times-circle', warning: 'fa-exclamation-triangle', info: 'fa-info-circle' };
+  toast.className = `toast ${type}`;
+  toast.innerHTML = `<i class="fas ${icons[type]}"></i><span>${message}</span>`;
+  container.appendChild(toast);
+  setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translateX(100%)'; toast.style.transition = 'all 0.3s ease'; setTimeout(() => toast.remove(), 300); }, 4000);
+}
+
+// ===== AES-256 Encryption Simulation =====
+async function generateEncryptionKey() {
+  try {
+    const key = await crypto.subtle.generateKey({ name: 'AES-GCM', length: 256 }, true, ['encrypt', 'decrypt']);
+    appState.encryptionKey = key;
+    return key;
+  } catch (e) {
+    // Fallback for non-HTTPS
+    appState.encryptionKey = { sim: true };
+    return appState.encryptionKey;
+  }
+}
+
+async function encryptData(data) {
+  const key = await generateEncryptionKey();
+  if (key.sim) {
+    return btoa(encodeURIComponent(JSON.stringify(data)));
+  }
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const encoded = new TextEncoder().encode(JSON.stringify(data));
+  const ciphertext = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, encoded);
+  return { iv: Array.from(iv), data: Array.from(new Uint8Array(ciphertext)) };
+}
+
+async function decryptData(encData) {
+  if (appState.encryptionKey && appState.encryptionKey.sim) {
+    return JSON.parse(decodeURIComponent(atob(encData)));
+  }
+  try {
+    const key = appState.encryptionKey;
+    const iv = new Uint8Array(encData.iv);
+    const data = new Uint8Array(encData.data);
+    const decrypted = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, data);
+    return JSON.parse(new TextDecoder().decode(decrypted));
+  } catch (e) {
+    return null;
+  }
+}
+
+// ===== Role Selection =====
+function selectRole(role) {
+  appState.currentRole = role;
+  document.querySelectorAll('.role-card').forEach(c => c.classList.remove('selected'));
+  document.querySelector(`.role-card[data-role="${role}"]`).classList.add('selected');
+  
+  // Auto-fill demo credentials
+  const creds = {
+    user: { email: 'rahul.123@email.com', pass: 'user123' },
+    hospital: { email: 'aiims.delhi@hospital.in', pass: 'hospital123' },
+    ambulance: { email: 'ambulance.dl08@ems.in', pass: 'ambulance123' },
+    admin: { email: 'admin@mediaShield.in', pass: 'admin123' }
+  };
+  document.getElementById('loginEmail').value = creds[role].email;
+  document.getElementById('loginPassword').value = creds[role].pass;
+}
+
+// ===== Login Handler =====
+function handleLogin() {
+  const email = document.getElementById('loginEmail').value;
+  const password = document.getElementById('loginPassword').value;
+  const role = appState.currentRole;
+  
+  if (!role) { showToast('Please select a role first', 'warning'); return; }
+  if (!email || !password) { showToast('Please enter email and password', 'warning'); return; }
+  
+  appState.isLoggedIn = true;
+  
+  // Hide login, show appropriate dashboard
+  document.getElementById('loginScreen').classList.add('hidden');
+  const dashboards = { user: 'userDashboard', hospital: 'hospitalDashboard', ambulance: 'ambulanceDashboard', admin: 'adminDashboard' };
+  document.getElementById(dashboards[role]).classList.remove('hidden');
+  
+  // Initialize QR code for user
+  if (role === 'user') { setTimeout(generateUserQR, 300); }
+  // Draw admin chart
+  if (role === 'admin') { setTimeout(drawAdminChart, 300); }
+  
+  showToast(`Welcome! Logged in as ${role.charAt(0).toUpperCase() + role.slice(1)}`, 'success');
+}
+
+// ===== Logout Handler =====
+function handleLogout() {
+  appState.isLoggedIn = false;
+  appState.currentRole = null;
+  
+  // Hide all dashboards
+  ['userDashboard', 'hospitalDashboard', 'ambulanceDashboard', 'adminDashboard'].forEach(id => {
+    document.getElementById(id).classList.add('hidden');
+  });
+  
+  // Show login
+  document.getElementById('loginScreen').classList.remove('hidden');
+  showToast('Logged out successfully', 'info');
+}
+
+// ===== Password Toggle =====
+function togglePassword() {
+  const input = document.getElementById('loginPassword');
+  const icon = document.getElementById('eyeIcon');
+  if (input.type === 'password') { input.type = 'text'; icon.className = 'fas fa-eye-slash'; }
+  else { input.type = 'password'; icon.className = 'fas fa-eye'; }
+}
+
+// ===== Sidebar Toggle =====
+function toggleSidebar(sidebarId) {
+  const sidebar = document.getElementById(sidebarId);
+  sidebar.classList.toggle('mobile-open');
+}
+
+// ===== User Dashboard Sections =====
+function showUserSection(section) {
+  const sections = ['healthCard', 'medicalInfo', 'emergencyContacts', 'scanLogs', 'bloodDonation', 'chronicDiseases', 'geoTracking', 'userSettings'];
+  sections.forEach(s => document.getElementById(`section-${s}`).classList.add('hidden'));
+  document.getElementById(`section-${section}`).classList.remove('hidden');
+  document.getElementById(`section-${section}`).classList.add('fade-in');
+  
+  // Update sidebar active
+  document.querySelectorAll('#userSidebar .sidebar-link').forEach(l => l.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  
+  // Update title
+  const titles = { healthCard:'Health Card', medicalInfo:'Medical Information', emergencyContacts:'Emergency Contacts', scanLogs:'Scan Logs', bloodDonation:'Blood Donation', chronicDiseases:'Chronic Diseases', geoTracking:'Geo Tracking', userSettings:'Settings' };
+  document.getElementById('userPageTitle').textContent = titles[section] || section;
+  
+  // Close mobile sidebar
+  document.getElementById('userSidebar').classList.remove('mobile-open');
+}
+
+// ===== Hospital Dashboard Sections =====
+function showHospitalSection(section) {
+  const sections = ['scanPatient', 'patientRecords', 'emergencyAccess', 'hospitalLogs'];
+  sections.forEach(s => document.getElementById(`hsection-${s}`).classList.add('hidden'));
+  document.getElementById(`hsection-${section}`).classList.remove('hidden');
+  document.getElementById(`hsection-${section}`).classList.add('fade-in');
+  
+  document.querySelectorAll('#hospitalSidebar .sidebar-link').forEach(l => l.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  
+  const titles = { scanPatient:'Scan Patient QR', patientRecords:'Patient Records', emergencyAccess:'Emergency Access', hospitalLogs:'Access Logs' };
+  document.getElementById('hospitalPageTitle').textContent = titles[section];
+  document.getElementById('hospitalSidebar').classList.remove('mobile-open');
+}
+
+// ===== Ambulance Dashboard Sections =====
+function showAmbulanceSection(section) {
+  const sections = ['quickScan', 'offlineMode', 'gpsTracking', 'criticalInfo'];
+  sections.forEach(s => document.getElementById(`asection-${s}`).classList.add('hidden'));
+  document.getElementById(`asection-${section}`).classList.remove('hidden');
+  document.getElementById(`asection-${section}`).classList.add('fade-in');
+  
+  document.querySelectorAll('#ambulanceSidebar .sidebar-link').forEach(l => l.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  
+  const titles = { quickScan:'Quick Scan', offlineMode:'Offline Mode', gpsTracking:'GPS Tracking', criticalInfo:'Critical Info' };
+  document.getElementById('ambulancePageTitle').textContent = titles[section];
+  document.getElementById('ambulanceSidebar').classList.remove('mobile-open');
+}
+
+// ===== Admin Dashboard Sections =====
+function showAdminSection(section) {
+  const sections = ['overview', 'userManagement', 'roleManagement', 'auditTrail', 'systemSettings'];
+  sections.forEach(s => document.getElementById(`adsection-${s}`).classList.add('hidden'));
+  document.getElementById(`adsection-${section}`).classList.remove('hidden');
+  document.getElementById(`adsection-${section}`).classList.add('fade-in');
+  
+  document.querySelectorAll('#adminSidebar .sidebar-link').forEach(l => l.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  
+  const titles = { overview:'Overview', userManagement:'User Management', roleManagement:'Role Management', auditTrail:'Audit Trail', systemSettings:'System Settings' };
+  document.getElementById('adminPageTitle').textContent = titles[section];
+  document.getElementById('adminSidebar').classList.remove('mobile-open');
+}
+
+// ===== QR Code Generation =====
+function generateUserQR() {
+  const container = document.getElementById('userQRCode');
+  container.innerHTML = '';
+  const qrData = JSON.stringify({
+    id: 'EHC-2024-IN-87432',
+    name: 'Rahul ',
+    type: 'MEDI_ CARD',
+    enc: true,
+    ver: '2.0'
+  });
+  
+  try {
+    new QRCode(container, {
+      text: qrData,
+      width: 180,
+      height: 180,
+      colorDark: '#1D3557',
+      colorLight: '#FFFFFF',
+      correctLevel: QRCode.CorrectLevel.H
+    });
+  } catch(e) {
+    // Fallback if QRCode library not loaded
+    container.innerHTML = '<div style="width:180px;height:180px;background:#fff;display:flex;align-items:center;justify-content:center;border-radius:8px;"><i class="fas fa-qrcode" style="font-size:80px;color:#1D3557"></i></div>';
+  }
+}
+
+// ===== Simulate QR Scan (Hospital) =====
+function simulateScan() {
+  showToast('QR Code scanned successfully! Decrypting data...', 'info');
+  
+  // Log the scan
+  logScan({
+    scanner: 'AIIMS New Delhi',
+    role: 'Hospital',
+    purpose: 'Emergency Treatment',
+    timestamp: new Date().toISOString(),
+    location: '28.5672°N, 77.2100°E'
+  });
+  
+  setTimeout(() => {
+    document.getElementById('scanResult').classList.remove('hidden');
+    document.getElementById('scanResult').classList.add('fade-in');
+    showToast('Patient data decrypted. Contacts notified.', 'success');
+  }, 1500);
+}
+
+// ===== Simulate QR Scan (Ambulance) =====
+function simulateAmbulanceScan() {
+  showToast('Scanning QR code...', 'info');
+  
+  logScan({
+    scanner: 'Ambulance DL-08-AB-1234',
+    role: 'Ambulance',
+    purpose: 'Critical Care',
+    timestamp: new Date().toISOString(),
+    location: '28.6139°N, 77.2090°E'
+  });
+  
+  setTimeout(() => {
+    document.getElementById('ambScanResult').classList.remove('hidden');
+    document.getElementById('ambScanResult').classList.add('fade-in');
+    showToast('Critical data loaded. Emergency contacts notified.', 'success');
+  }, 1000);
+}
+
+// ===== Search Patient =====
+function searchPatient() {
+  const id = document.getElementById('manualEmergId')?.value || document.getElementById('ambManualId')?.value || 'EHC-2024-IN-87432';
+  if (!id) { showToast('Please enter an Emergency ID', 'warning'); return; }
+  showToast(`Searching for ${id}...`, 'info');
+  setTimeout(() => { showToast('Patient found! Decrypting records...', 'success'); simulateScan(); }, 1500);
+}
+
+// ===== Scan Logging =====
+function logScan(scanInfo) {
+  const log = {
+    ...scanInfo,
+    id: Date.now(),
+    gps: scanInfo.location,
+    ipAddress: '103.45.xx.xx'
+  };
+  appState.scanLogs.push(log);
+  
+  // Save to localStorage
+  const existingLogs = JSON.parse(localStorage.getItem('medishield_scan_logs') || '[]');
+  existingLogs.push(log);
+  localStorage.setItem('medishield_scan_logs', JSON.stringify(existingLogs));
+  
+  // Send notification (simulated)
+  notifyEmergencyContacts(scanInfo);
+}
+
+// ===== Notify Emergency Contacts =====
+function notifyEmergencyContacts(scanInfo) {
+  // Simulate notification
+  const notification = {
+    type: 'QR_SCAN_ALERT',
+    message: `Your MediShield Card was scanned by ${scanInfo.scanner}`,
+    timestamp: scanInfo.timestamp,
+    location: scanInfo.location
+  };
+  
+  // Store notification
+  const notifications = JSON.parse(localStorage.getItem('medishield_notifications') || '[]');
+  notifications.push(notification);
+  localStorage.setItem('medishield_notifications', JSON.stringify(notifications));
+}
+
+// ===== Geo Location =====
+function getCurrentLocation() {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        showToast(`Location updated: ${pos.coords.latitude.toFixed(4)}°N, ${pos.coords.longitude.toFixed(4)}°E`, 'success');
+      },
+      (err) => {
+        showToast('Location access denied. Using last known location.', 'warning');
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  } else {
+    showToast('Geolocation not supported by your browser', 'error');
+  }
+}
+
+function shareLocation() {
+  getCurrentLocation();
+  showToast('Sharing live location with emergency contacts...', 'info');
+  setTimeout(() => showToast('Location shared with Priya , Amit , Dr. Verma', 'success'), 2000);
+}
+
+// ===== Emergency Actions =====
+function triggerSOS() {
+  showToast('SOS ACTIVATED! Emergency contacts and 108 notified!', 'error');
+  getCurrentLocation();
+}
+
+function callAmbulance() {
+  showToast('Connecting to 108 Ambulance Service...', 'info');
+  setTimeout(() => showToast('Ambulance dispatched to your location!', 'success'), 2000);
+}
+
+// ===== Blood Donor Toggle =====
+function toggleBloodDonor() {
+  const toggle = document.getElementById('bloodDonorToggle');
+  toggle.classList.toggle('active');
+  const isDonor = toggle.classList.contains('active');
+  showToast(`Blood donation status: ${isDonor ? 'Available' : 'Unavailable'}`, isDonor ? 'success' : 'warning');
+}
+
+// ===== Offline Mode =====
+function toggleOfflineMode() {
+  appState.isOffline = !appState.isOffline;
+  const banner = document.getElementById('offlineBanner');
+  if (appState.isOffline) {
+    banner.classList.remove('hidden');
+    showToast('Offline mode activated. Data sync will occur on reconnection.', 'warning');
+  } else {
+    banner.classList.add('hidden');
+    showToast('Online mode restored. Syncing access logs...', 'success');
+  }
+}
+
+// ===== Public Scan View =====
+function showPublicScanView() {
+  document.getElementById('publicScanModal').classList.remove('hidden');
+}
+
+function closePublicScan(e) {
+  if (e.target === e.currentTarget) {
+    document.getElementById('publicScanModal').classList.add('hidden');
+  }
+}
+
+// ===== Add Items (Allergies, Medications, Conditions) =====
+function addItem(type) {
+  const inputMap = { allergy: 'allergyInput', med: 'medInput', cond: 'condInput' };
+  const input = document.getElementById(inputMap[type]);
+  if (!input || !input.value.trim()) { showToast('Please enter a value', 'warning'); return; }
+  showToast(`${input.value} added successfully!`, 'success');
+  input.value = '';
+}
+
+function addEmergencyContact() {
+  showToast('Add contact form would open here', 'info');
+}
+
+function addChronicDisease() {
+  showToast('Add chronic disease form would open here', 'info');
+}
+
+// ===== Download & Print =====
+function downloadQR() {
+  const canvas = document.querySelector('#userQRCode canvas');
+  if (canvas) {
+    const link = document.createElement('a');
+    link.download = 'MediShield-QR.png';
+    link.href = canvas.toDataURL();
+    link.click();
+    showToast('QR Code downloaded!', 'success');
+  } else {
+    showToast('QR Code not available for download', 'warning');
+  }
+}
+
+function printCard() {
+  showToast('Preparing health card for printing...', 'info');
+  setTimeout(() => window.print(), 500);
+}
+
+// ===== Admin Chart =====
+function drawAdminChart() {
+  const canvas = document.getElementById('adminChart');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const rect = canvas.parentElement.getBoundingClientRect();
+  canvas.width = rect.width - 48;
+  canvas.height = 200;
+  
+  const data = [12400, 15600, 13200, 18900, 22100, 19800, 24300];
+  const labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  const max = Math.max(...data);
+  const w = canvas.width;
+  const h = canvas.height;
+  const barW = (w - 80) / data.length;
+  const chartH = h - 40;
+  
+  ctx.clearRect(0, 0, w, h);
+  
+  // Grid lines
+  for (let i = 0; i <= 4; i++) {
+    const y = 10 + (chartH / 4) * i;
+    ctx.strokeStyle = 'rgba(26,39,68,0.5)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(40, y);
+    ctx.lineTo(w - 10, y);
+    ctx.stroke();
+    
+    ctx.fillStyle = '#7B8CA8';
+    ctx.font = '10px DM Sans';
+    ctx.textAlign = 'right';
+    ctx.fillText(Math.round(max - (max / 4) * i).toLocaleString(), 35, y + 4);
+  }
+  
+  // Bars
+  data.forEach((val, i) => {
+    const barH = (val / max) * chartH;
+    const x = 50 + i * barW + barW * 0.15;
+    const bw = barW * 0.7;
+    const y = 10 + chartH - barH;
+    
+    const grad = ctx.createLinearGradient(x, y, x, y + barH);
+    grad.addColorStop(0, '#E63946');
+    grad.addColorStop(1, '#C1121F');
+    ctx.fillStyle = grad;
+    
+    // Rounded top
+    const r = Math.min(4, bw / 2);
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + bw - r, y);
+    ctx.quadraticCurveTo(x + bw, y, x + bw, y + r);
+    ctx.lineTo(x + bw, y + barH);
+    ctx.lineTo(x, y + barH);
+    ctx.lineTo(x, y + r);
+    ctx.quadraticCurveTo(x, y, x + r, y);
+    ctx.fill();
+    
+    // Label
+    ctx.fillStyle = '#7B8CA8';
+    ctx.font = '10px DM Sans';
+    ctx.textAlign = 'center';
+    ctx.fillText(labels[i], x + bw / 2, h - 5);
+  });
+}
+
+// ===== Simulate Public Scan (demo) =====
+// Show public scan view if URL has ?scan=public
+if (window.location.search.includes('scan=public')) {
+  setTimeout(showPublicScanView, 500);
+}
+
+// ===== Demo: Show public scan on Ctrl+P =====
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'p' && e.ctrlKey) {
+    e.preventDefault();
+    showPublicScanView();
+  }
+});
+
+// ===== Auto-select role on page load =====
+document.addEventListener('DOMContentLoaded', () => {
+  generateEncryptionKey();
+  
+  // Add a demo button in login for public scan
+  const loginForm = document.getElementById('loginForm');
+  const publicScanBtn = document.createElement('div');
+  publicScanBtn.className = 'text-center mt-3';
+  publicScanBtn.innerHTML = '<button onclick="showPublicScanView()" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:12px;text-decoration:underline">Preview Public QR Scan View</button>';
+  loginForm.appendChild(publicScanBtn);
+  
+  // Monitor online/offline status
+  window.addEventListener('online', () => {
+    if (appState.isOffline) {
+      appState.isOffline = false;
+      document.getElementById('offlineBanner')?.classList.add('hidden');
+      showToast('Connection restored. Syncing data...', 'success');
+    }
+  });
+  
+  window.addEventListener('offline', () => {
+    appState.isOffline = true;
+    document.getElementById('offlineBanner')?.classList.remove('hidden');
+    showToast('You are offline. Emergency mode active.', 'warning');
+  });
+});
+
+// ===== Responsive: Close sidebar on outside click =====
+document.addEventListener('click', (e) => {
+  const sidebars = ['userSidebar', 'hospitalSidebar', 'ambulanceSidebar', 'adminSidebar'];
+  sidebars.forEach(id => {
+    const sidebar = document.getElementById(id);
+    if (sidebar && sidebar.classList.contains('mobile-open')) {
+      if (!sidebar.contains(e.target) && !e.target.closest('.fa-bars')) {
+        sidebar.classList.remove('mobile-open');
+      }
+    }
+  });
+});
+</script>
+
+</body>
+</html>
+```
